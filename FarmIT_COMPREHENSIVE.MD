@@ -2,7 +2,7 @@
 
 ## 🧭 Project Overview
 
-**Project Name:** FarmIt  
+**Project Name:** FarmIT
 **Project Type:** Small-to-Medium Scale Web Application  
 **Core Concept:**  
 FarmIt is a **"Farm-to-Market" platform** designed to connect **local farmers** directly with **consumers, restaurants, and small businesses**, enabling transparent and sustainable agricultural trade in the Philippines.
