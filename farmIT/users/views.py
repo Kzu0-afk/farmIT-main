@@ -2,6 +2,7 @@ from django.contrib import messages
 from django.contrib.auth import login
 from django.contrib.auth.decorators import login_required
 from django.contrib.auth.views import LoginView, LogoutView
+from django.contrib.auth import logout
 from django.http import HttpRequest, HttpResponse
 from django.shortcuts import redirect, render
 
@@ -15,6 +16,11 @@ class FarmerLoginView(LoginView):
 class FarmerLogoutView(LogoutView):
     next_page = '/'
 
+def logout_redirect_login(request: HttpRequest) -> HttpResponse:
+    """Allow GET logout and redirect to login page."""
+    if request.user.is_authenticated:
+        logout(request)
+    return redirect('login')
 
 def register(request: HttpRequest) -> HttpResponse:
     if request.method == 'POST':
