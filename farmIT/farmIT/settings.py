@@ -12,24 +12,34 @@ https://docs.djangoproject.com/en/5.2/ref/settings/
 
 from pathlib import Path
 import os
+from urllib.parse import urlparse
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
+
+# Load .env if available (safe in dev; ignored if package not installed)
+try:
+    from dotenv import load_dotenv, find_dotenv  # type: ignore
+    # 1) auto-discover from current working directory upward
+    load_dotenv(find_dotenv(), override=False)
+    # 2) explicitly try repo root and project subdir as fallbacks
+    load_dotenv(dotenv_path=(BASE_DIR.parent / '.env'), override=False)
+    load_dotenv(dotenv_path=(BASE_DIR / '.env'), override=False)
+except Exception:
+    pass
 
 
 # Quick-start development settings - unsuitable for production
 # See https://docs.djangoproject.com/en/5.2/howto/deployment/checklist/
 
-# SECURITY WARNING: keep the secret key used in production secret!
-SECRET_KEY = 'django-insecure-o=leqak4^p=!123k%u*g_)7)4xwg@o+gy1t+*9!b(0e@paerd$'
+# SECURITY: load secrets from environment. Set DJANGO_SECRET_KEY in prod.
+SECRET_KEY = os.getenv('DJANGO_SECRET_KEY', 'insecure-dev-key-change-me')
 
-# SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = True
+# SECURITY: control debug via env (DJANGO_DEBUG=true/false). Defaults to True for local dev.
+DEBUG = os.getenv('DJANGO_DEBUG', 'True').lower() in ('1', 'true', 'yes')
 
-ALLOWED_HOSTS = [
-    '127.0.0.1',
-    'localhost',
-]
+ALLOWED_HOSTS = [h.strip() for h in os.getenv('DJANGO_ALLOWED_HOSTS', '127.0.0.1,localhost').split(',') if h.strip()]
+CSRF_TRUSTED_ORIGINS = [u.strip() for u in os.getenv('CSRF_TRUSTED_ORIGINS', '').split(',') if u.strip()]
 
 
 # Application definition
@@ -81,30 +91,48 @@ WSGI_APPLICATION = 'farmIT.wsgi.application'
 # Database
 # https://docs.djangoproject.com/en/5.2/ref/settings/#databases
 
-PGHOST = os.getenv('PGHOST')
-PGDATABASE = os.getenv('PGDATABASE')
-PGUSER = os.getenv('PGUSER')
-PGPASSWORD = os.getenv('PGPASSWORD')
-PGPORT = os.getenv('PGPORT', '5432')
-
-if PGHOST and PGDATABASE and PGUSER and PGPASSWORD:
+# Prefer a single DATABASE_URL (e.g. from Supabase), else fall back to PG* vars,
+# else use local SQLite for development.
+db_url = (os.getenv('DATABASE_URL') or '').strip()
+if db_url:
+    parsed = urlparse(db_url.strip())
     DATABASES = {
         'default': {
             'ENGINE': 'django.db.backends.postgresql',
-            'HOST': PGHOST,
-            'NAME': PGDATABASE,
-            'USER': PGUSER,
-            'PASSWORD': PGPASSWORD,
-            'PORT': PGPORT,
+            'NAME': (parsed.path or '').lstrip('/').strip(),
+            'USER': (parsed.username or '').strip(),
+            'PASSWORD': (parsed.password or ''),
+            'HOST': (parsed.hostname or '').strip(),
+            'PORT': str((parsed.port or '5432')).strip(),
+            'OPTIONS': {'sslmode': 'require'},
         }
     }
 else:
-    DATABASES = {
-        'default': {
-            'ENGINE': 'django.db.backends.sqlite3',
-            'NAME': BASE_DIR / 'db.sqlite3',
+    PGHOST = os.getenv('PGHOST')
+    PGDATABASE = os.getenv('PGDATABASE')
+    PGUSER = os.getenv('PGUSER')
+    PGPASSWORD = os.getenv('PGPASSWORD')
+    PGPORT = os.getenv('PGPORT', '5432')
+
+    if PGHOST and PGDATABASE and PGUSER and PGPASSWORD:
+        DATABASES = {
+            'default': {
+                'ENGINE': 'django.db.backends.postgresql',
+                'HOST': PGHOST,
+                'NAME': PGDATABASE,
+                'USER': PGUSER,
+                'PASSWORD': PGPASSWORD,
+                'PORT': PGPORT,
+                'OPTIONS': {'sslmode': 'require'},
+            }
         }
-    }
+    else:
+        DATABASES = {
+            'default': {
+                'ENGINE': 'django.db.backends.sqlite3',
+                'NAME': BASE_DIR / 'db.sqlite3',
+            }
+        }
 
 
 # Password validation
