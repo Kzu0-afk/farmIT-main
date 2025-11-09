@@ -91,48 +91,12 @@ WSGI_APPLICATION = 'farmIT.wsgi.application'
 # Database
 # https://docs.djangoproject.com/en/5.2/ref/settings/#databases
 
-# Prefer a single DATABASE_URL (e.g. from Supabase), else fall back to PG* vars,
-# else use local SQLite for development.
-db_url = (os.getenv('DATABASE_URL') or '').strip()
-if db_url:
-    parsed = urlparse(db_url.strip())
-    DATABASES = {
-        'default': {
-            'ENGINE': 'django.db.backends.postgresql',
-            'NAME': (parsed.path or '').lstrip('/').strip(),
-            'USER': (parsed.username or '').strip(),
-            'PASSWORD': (parsed.password or ''),
-            'HOST': (parsed.hostname or '').strip(),
-            'PORT': str((parsed.port or '5432')).strip(),
-            'OPTIONS': {'sslmode': 'require'},
-        }
+DATABASES = {
+    'default': {
+        'ENGINE': 'django.db.backends.sqlite3',
+        'NAME': BASE_DIR / 'db.sqlite3',
     }
-else:
-    PGHOST = os.getenv('PGHOST')
-    PGDATABASE = os.getenv('PGDATABASE')
-    PGUSER = os.getenv('PGUSER')
-    PGPASSWORD = os.getenv('PGPASSWORD')
-    PGPORT = os.getenv('PGPORT', '5432')
-
-    if PGHOST and PGDATABASE and PGUSER and PGPASSWORD:
-        DATABASES = {
-            'default': {
-                'ENGINE': 'django.db.backends.postgresql',
-                'HOST': PGHOST,
-                'NAME': PGDATABASE,
-                'USER': PGUSER,
-                'PASSWORD': PGPASSWORD,
-                'PORT': PGPORT,
-                'OPTIONS': {'sslmode': 'require'},
-            }
-        }
-    else:
-        DATABASES = {
-            'default': {
-                'ENGINE': 'django.db.backends.sqlite3',
-                'NAME': BASE_DIR / 'db.sqlite3',
-            }
-        }
+}
 
 
 # Password validation

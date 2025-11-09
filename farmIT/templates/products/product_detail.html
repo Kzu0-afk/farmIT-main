@@ -9,6 +9,13 @@
   <div class="text-gray-700">Quantity: {{ product.quantity }}</div>
   <div class="text-gray-700">Location: {{ product.location }}</div>
   <div class="text-gray-700">Payment: {{ product.get_mode_of_payment_display }}</div>
+
+  {% if product.is_reserved %}
+  <div class="mt-3 inline-block bg-yellow-100 text-yellow-800 text-sm px-3 py-1 rounded">Reserved</div>
+  {% endif %}
+  {% if not product.is_approved %}
+  <div class="mt-3 inline-block bg-red-100 text-red-800 text-sm px-3 py-1 rounded">Pending approval</div>
+  {% endif %}
   <p class="mt-4">{{ product.description }}</p>
 
   {% if user == product.farmer %}
@@ -16,6 +23,31 @@
     <a href="/products/{{ product.id }}/edit/" class="bg-blue-600 text-white px-3 py-2 rounded">Edit</a>
     <a href="/products/{{ product.id }}/delete/" class="bg-red-600 text-white px-3 py-2 rounded">Delete</a>
   </div>
+
+  {% if interests %}
+  <div class="mt-8">
+    <h2 class="font-semibold mb-2">Interested buyers</h2>
+    <ul class="space-y-2">
+      {% for tx in interests %}
+      <li class="flex items-center justify-between bg-gray-50 p-3 rounded border">
+        <div class="text-sm">{{ tx.buyer.username }} — {{ tx.created_at|date:'M d, Y H:i' }}</div>
+        <a href="/transactions/{{ tx.id }}/reserve/" class="text-white bg-green-700 px-3 py-1 rounded text-sm">Reserve</a>
+      </li>
+      {% empty %}
+      <li class="text-sm text-gray-500">No interests yet.</li>
+      {% endfor %}
+    </ul>
+  </div>
+  {% endif %}
+  {% else %}
+    {% if user.is_authenticated and product.is_approved and not product.is_reserved %}
+    <form method="post" action="/products/{{ product.id }}/interest/" class="mt-6">
+      {% csrf_token %}
+      <button class="bg-green-700 text-white px-4 py-2 rounded">I'm interested</button>
+    </form>
+    {% elif not user.is_authenticated and product.is_approved and not product.is_reserved %}
+    <p class="mt-6 text-sm text-gray-600">Please <a class="text-green-700 underline" href="/accounts/login/?next=/products/{{ product.id }}/">login</a> to express interest.</p>
+    {% endif %}
   {% endif %}
 </div>
 {% endblock %}

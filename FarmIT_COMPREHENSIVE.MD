@@ -134,21 +134,23 @@ Backend (Django on Railway) ↔ Supabase (Database)
 
 ---
 
-## 🚀 Development Roadmap (Phase 1–3)
+## 🚀 Development Roadmap (Phase 1–4)
 
 ### **Phase 1: Core MVP (Weeks 1–4)**
-- [ ] Django backend setup with Supabase PostgreSQL connection
 - [ ] Farmer registration, authentication, and CRUD for product listings
 - [ ] Basic frontend with Tailwind CSS integration
-- [ ] Deployment setup (Railway backend, Vercel frontend)
 
 ### **Phase 2: Usability & Features (Weeks 5–7)**
 - [ ] Search & filter by product, price, or location
-- [ ] Product image upload to Supabase storage
 - [ ] Admin dashboard (moderation and analytics)
 - [ ] Simple transaction model (buyer interest, reservation)
 
-### **Phase 3: Polishing & Launch (Weeks 8–10)**
+### **Phase 3: Cloud Database & Hosting (Weeks 8–9)**
+- [ ] Django backend setup with Supabase PostgreSQL connection
+- [ ] Product image upload to Supabase storage
+- [ ] Deployment setup (Railway backend, Vercel frontend)
+
+### **Phase 4: Polishing & Launch (Weeks 10–12)**
 - [ ] Responsive UI/UX improvements
 - [ ] Performance optimization
 - [ ] Security enhancements (CSRF, JWT auth)
