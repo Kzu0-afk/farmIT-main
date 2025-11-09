@@ -25,10 +25,41 @@ class Product(models.Model):
     )
     created_at = models.DateTimeField(auto_now_add=True)
 
+    # Moderation & reservation
+    is_approved = models.BooleanField(default=True)
+    is_reserved = models.BooleanField(default=False)
+    reserved_by = models.ForeignKey(
+        settings.AUTH_USER_MODEL,
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True,
+        related_name='reserved_products',
+    )
+
     class Meta:
         ordering = ['-created_at']
 
     def __str__(self) -> str:
         return f"{self.product_name} ({self.quantity})"
 
+
+class Transaction(models.Model):
+    STATUS_CHOICES = [
+        ('interested', 'Interested'),
+        ('reserved', 'Reserved'),
+        ('completed', 'Completed'),
+        ('cancelled', 'Cancelled'),
+    ]
+
+    product = models.ForeignKey(Product, on_delete=models.CASCADE, related_name='transactions')
+    buyer = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name='transactions')
+    status = models.CharField(max_length=20, choices=STATUS_CHOICES, default='interested')
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        ordering = ['-created_at']
+        indexes = [models.Index(fields=['product', 'buyer'])]
+
+    def __str__(self) -> str:
+        return f"{self.buyer} -> {self.product} [{self.status}]"
 
