@@ -1,54 +1,216 @@
 {% extends 'base.html' %}
 {% block content %}
-<div class="bg-white p-6 rounded shadow">
-  <h1 class="text-2xl font-semibold mb-2">{{ product.product_name }}</h1>
-  {% if product.photo_url %}
-  <img src="{{ product.photo_url }}" alt="{{ product.product_name }}" class="w-full max-w-md rounded mb-4" />
-  {% endif %}
-  <div class="text-xl text-green-700 font-semibold">₱ {{ product.price }}</div>
-  <div class="text-gray-700">Quantity: {{ product.quantity }}</div>
-  <div class="text-gray-700">Location: {{ product.location }}</div>
-  <div class="text-gray-700">Payment: {{ product.get_mode_of_payment_display }}</div>
+<div class="bg-gradient-to-b from-green-50 to-white min-h-screen py-8 px-4">
+  <div class="max-w-6xl mx-auto">
+    
+    <!-- Back button -->
+    <a href="/" class="inline-flex items-center text-green-700 hover:text-green-800 mb-6 transition duration-200">
+      <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18" />
+      </svg>
+      Back to Marketplace
+    </a>
 
-  {% if product.is_reserved %}
-  <div class="mt-3 inline-block bg-yellow-100 text-yellow-800 text-sm px-3 py-1 rounded">Reserved</div>
-  {% endif %}
-  {% if not product.is_approved %}
-  <div class="mt-3 inline-block bg-red-100 text-red-800 text-sm px-3 py-1 rounded">Pending approval</div>
-  {% endif %}
-  <p class="mt-4">{{ product.description }}</p>
+    <!-- Main content grid -->
+    <div class="grid grid-cols-1 lg:grid-cols-2 gap-8">
+      
+      <!-- Left column: Image -->
+      <div class="bg-white rounded-2xl shadow-lg overflow-hidden border border-gray-200">
+        {% if product.photo_url %}
+        <img src="{{ product.photo_url }}" alt="{{ product.product_name }}" class="w-full h-96 object-cover" />
+        {% else %}
+        <div class="w-full h-96 bg-gradient-to-br from-green-100 via-amber-50 to-green-50 flex items-center justify-center">
+          <svg class="w-32 h-32 text-green-600 opacity-40" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
+          </svg>
+        </div>
+        {% endif %}
+      </div>
 
-  {% if user == product.farmer %}
-  <div class="mt-6 space-x-3">
-    <a href="/products/{{ product.id }}/edit/" class="bg-blue-600 text-white px-3 py-2 rounded">Edit</a>
-    <a href="/products/{{ product.id }}/delete/" class="bg-red-600 text-white px-3 py-2 rounded">Delete</a>
-  </div>
+      <!-- Right column: Details -->
+      <div class="bg-white rounded-2xl shadow-lg p-8 border border-gray-200">
+        
+        <!-- Status badges -->
+        <div class="flex flex-wrap gap-2 mb-4">
+          {% if product.is_reserved %}
+          <span class="inline-flex items-center bg-yellow-100 text-yellow-800 text-sm font-semibold px-3 py-1 rounded-full">
+            <svg class="w-4 h-4 mr-1" fill="currentColor" viewBox="0 0 20 20">
+              <path fill-rule="evenodd" d="M5 9V7a5 5 0 0110 0v2a2 2 0 012 2v5a2 2 0 01-2 2H5a2 2 0 01-2-2v-5a2 2 0 012-2zm8-2v2H7V7a3 3 0 016 0z" clip-rule="evenodd" />
+            </svg>
+            Reserved
+          </span>
+          {% endif %}
+          {% if not product.is_approved %}
+          <span class="inline-flex items-center bg-red-100 text-red-800 text-sm font-semibold px-3 py-1 rounded-full">
+            <svg class="w-4 h-4 mr-1" fill="currentColor" viewBox="0 0 20 20">
+              <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z" clip-rule="evenodd" />
+            </svg>
+            Pending Approval
+          </span>
+          {% endif %}
+        </div>
 
-  {% if interests %}
-  <div class="mt-8">
-    <h2 class="font-semibold mb-2">Interested buyers</h2>
-    <ul class="space-y-2">
-      {% for tx in interests %}
-      <li class="flex items-center justify-between bg-gray-50 p-3 rounded border">
-        <div class="text-sm">{{ tx.buyer.username }} — {{ tx.created_at|date:'M d, Y H:i' }}</div>
-        <a href="/transactions/{{ tx.id }}/reserve/" class="text-white bg-green-700 px-3 py-1 rounded text-sm">Reserve</a>
-      </li>
-      {% empty %}
-      <li class="text-sm text-gray-500">No interests yet.</li>
-      {% endfor %}
-    </ul>
-  </div>
-  {% endif %}
-  {% else %}
-    {% if user.is_authenticated and product.is_approved and not product.is_reserved %}
-    <form method="post" action="/products/{{ product.id }}/interest/" class="mt-6">
-      {% csrf_token %}
-      <button class="bg-green-700 text-white px-4 py-2 rounded">I'm interested</button>
-    </form>
-    {% elif not user.is_authenticated and product.is_approved and not product.is_reserved %}
-    <p class="mt-6 text-sm text-gray-600">Please <a class="text-green-700 underline" href="/accounts/login/?next=/products/{{ product.id }}/">login</a> to express interest.</p>
+        <!-- Product name -->
+        <h1 class="text-4xl font-bold text-gray-900 mb-4">{{ product.product_name }}</h1>
+
+        <!-- Price -->
+        <div class="mb-6">
+          <div class="text-4xl font-bold text-green-700 mb-1">₱{{ product.price }}</div>
+          <div class="text-sm text-gray-500">per unit</div>
+        </div>
+
+        <!-- Details grid -->
+        <div class="grid grid-cols-2 gap-4 mb-6 pb-6 border-b border-gray-200">
+          <div class="bg-green-50 rounded-lg p-4">
+            <div class="flex items-center text-green-700 mb-1">
+              <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4" />
+              </svg>
+              <span class="text-sm font-semibold">Quantity</span>
+            </div>
+            <div class="text-2xl font-bold text-gray-900">{{ product.quantity }}</div>
+            <div class="text-xs text-gray-600">units available</div>
+          </div>
+
+          <div class="bg-amber-50 rounded-lg p-4">
+            <div class="flex items-center text-amber-700 mb-1">
+              <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" />
+              </svg>
+              <span class="text-sm font-semibold">Location</span>
+            </div>
+            <div class="text-lg font-bold text-gray-900">{{ product.location }}</div>
+          </div>
+        </div>
+
+        <!-- Payment method -->
+        <div class="mb-6 pb-6 border-b border-gray-200">
+          <div class="flex items-center text-gray-700 mb-2">
+            <svg class="w-5 h-5 mr-2 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 10h18M7 15h1m4 0h1m-7 4h12a3 3 0 003-3V8a3 3 0 00-3-3H6a3 3 0 00-3 3v8a3 3 0 003 3z" />
+            </svg>
+            <span class="font-semibold">Payment Method</span>
+          </div>
+          <div class="text-gray-900 font-medium">{{ product.get_mode_of_payment_display }}</div>
+        </div>
+
+        <!-- Description -->
+        {% if product.description %}
+        <div class="mb-6">
+          <h2 class="text-lg font-bold text-gray-900 mb-3 flex items-center">
+            <svg class="w-5 h-5 mr-2 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h7" />
+            </svg>
+            Description
+          </h2>
+          <p class="text-gray-700 leading-relaxed">{{ product.description }}</p>
+        </div>
+        {% endif %}
+
+        <!-- Seller info -->
+        <div class="bg-gray-50 rounded-lg p-4 mb-6">
+          <div class="flex items-center">
+            <div class="w-12 h-12 bg-green-100 rounded-full flex items-center justify-center mr-3">
+              <svg class="w-6 h-6 text-green-700" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
+              </svg>
+            </div>
+            <div>
+              <div class="text-sm text-gray-600">Sold by</div>
+              <div class="text-lg font-semibold text-gray-900">{{ product.farmer.username }}</div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Action buttons (owner view) -->
+        {% if user == product.farmer %}
+        <div class="flex flex-wrap gap-3">
+          <a href="/products/{{ product.id }}/edit/" class="flex-1 bg-gradient-to-r from-blue-600 to-blue-700 hover:from-blue-700 hover:to-blue-800 text-white font-semibold py-3 px-6 rounded-lg shadow-md hover:shadow-lg transition duration-200 flex items-center justify-center space-x-2">
+            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
+            </svg>
+            <span>Edit</span>
+          </a>
+          <a href="/products/{{ product.id }}/delete/" class="flex-1 bg-gradient-to-r from-red-600 to-red-700 hover:from-red-700 hover:to-red-800 text-white font-semibold py-3 px-6 rounded-lg shadow-md hover:shadow-lg transition duration-200 flex items-center justify-center space-x-2">
+            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+            </svg>
+            <span>Delete</span>
+          </a>
+        </div>
+        {% else %}
+          <!-- Interest button (buyer view) -->
+          {% if user.is_authenticated and product.is_approved and not product.is_reserved %}
+          <form method="post" action="/products/{{ product.id }}/interest/">
+            {% csrf_token %}
+            <button type="submit" class="w-full bg-gradient-to-r from-green-600 to-green-700 hover:from-green-700 hover:to-green-800 text-white font-bold py-4 px-6 rounded-lg shadow-md hover:shadow-lg transform hover:-translate-y-0.5 transition duration-200 flex items-center justify-center space-x-2">
+              <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z" />
+              </svg>
+              <span>I'm Interested</span>
+            </button>
+          </form>
+          {% elif not user.is_authenticated and product.is_approved and not product.is_reserved %}
+          <div class="bg-amber-50 border border-amber-200 rounded-lg p-4 flex items-start space-x-3">
+            <svg class="w-6 h-6 text-amber-600 flex-shrink-0 mt-0.5" fill="currentColor" viewBox="0 0 20 20">
+              <path fill-rule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z" clip-rule="evenodd" />
+            </svg>
+            <div>
+              <p class="text-sm font-semibold text-amber-900 mb-1">Want to buy this product?</p>
+              <p class="text-sm text-amber-800">
+                Please <a href="/accounts/login/?next=/products/{{ product.id }}/" class="font-bold underline hover:text-amber-900">login</a> to express your interest.
+              </p>
+            </div>
+          </div>
+          {% endif %}
+        {% endif %}
+      </div>
+    </div>
+
+    <!-- Interested buyers section (owner view only) -->
+    {% if user == product.farmer and interests %}
+    <div class="mt-8 bg-white rounded-2xl shadow-lg p-8 border border-gray-200">
+      <h2 class="text-2xl font-bold text-gray-900 mb-6 flex items-center">
+        <svg class="w-7 h-7 text-green-600 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z" />
+        </svg>
+        Interested Buyers
+      </h2>
+      <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+        {% for tx in interests %}
+        <div class="bg-gradient-to-r from-green-50 to-amber-50 rounded-lg p-4 border border-green-200 flex items-center justify-between">
+          <div class="flex items-center space-x-3">
+            <div class="w-10 h-10 bg-green-100 rounded-full flex items-center justify-center">
+              <svg class="w-5 h-5 text-green-700" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
+              </svg>
+            </div>
+            <div>
+              <div class="font-semibold text-gray-900">{{ tx.buyer.username }}</div>
+              <div class="text-xs text-gray-600">{{ tx.created_at|date:'M d, Y H:i' }}</div>
+            </div>
+          </div>
+          <a href="/transactions/{{ tx.id }}/reserve/" class="bg-gradient-to-r from-green-600 to-green-700 hover:from-green-700 hover:to-green-800 text-white font-semibold px-4 py-2 rounded-lg shadow-md hover:shadow-lg transition duration-200 flex items-center space-x-1">
+            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" />
+            </svg>
+            <span>Reserve</span>
+          </a>
+        </div>
+        {% empty %}
+        <div class="col-span-full text-center py-8 text-gray-500">
+          <svg class="w-16 h-16 text-gray-300 mx-auto mb-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z" />
+          </svg>
+          <p class="text-sm">No interested buyers yet</p>
+        </div>
+        {% endfor %}
+      </div>
+    </div>
     {% endif %}
-  {% endif %}
+
+  </div>
 </div>
 {% endblock %}
 
