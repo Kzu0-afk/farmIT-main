@@ -1,11 +1,16 @@
 from django.contrib.auth.decorators import login_required
 from django.contrib.admin.views.decorators import staff_member_required
-from django.db.models import Q
+from django.db.models import Q, Count
 from django.http import HttpRequest, HttpResponse, HttpResponseForbidden
 from django.shortcuts import get_object_or_404, redirect, render
 
 from .forms import ProductForm
 from .models import Product, Transaction
+
+
+def landing_page(request: HttpRequest) -> HttpResponse:
+    """Landing page with hero section and info about FarmIT"""
+    return render(request, 'products/landing_page.html')
 
 
 def product_list(request: HttpRequest) -> HttpResponse:

@@ -77,7 +77,42 @@
                 {% if field.errors %}
                   <p class="mt-1 text-sm text-red-600">{{ field.errors.0 }}</p>
                 {% endif %}
-                {% if field.help_text %}
+                
+                <!-- Dynamic password requirements (only for password1) -->
+                {% if field.name == 'password1' %}
+                <div id="password-requirements" class="mt-3 space-y-2 hidden">
+                  <div id="req-length" class="flex items-start text-xs transition-all duration-300">
+                    <svg class="w-4 h-4 mr-2 flex-shrink-0 mt-0.5 text-red-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+                    </svg>
+                    <span class="text-gray-700">At least 8 characters long</span>
+                  </div>
+                  <div id="req-lowercase" class="flex items-start text-xs transition-all duration-300">
+                    <svg class="w-4 h-4 mr-2 flex-shrink-0 mt-0.5 text-red-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+                    </svg>
+                    <span class="text-gray-700">Contains lowercase letter</span>
+                  </div>
+                  <div id="req-uppercase" class="flex items-start text-xs transition-all duration-300">
+                    <svg class="w-4 h-4 mr-2 flex-shrink-0 mt-0.5 text-red-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+                    </svg>
+                    <span class="text-gray-700">Contains uppercase letter</span>
+                  </div>
+                  <div id="req-number" class="flex items-start text-xs transition-all duration-300">
+                    <svg class="w-4 h-4 mr-2 flex-shrink-0 mt-0.5 text-red-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+                    </svg>
+                    <span class="text-gray-700">Contains a number</span>
+                  </div>
+                  <div id="req-special" class="flex items-start text-xs transition-all duration-300">
+                    <svg class="w-4 h-4 mr-2 flex-shrink-0 mt-0.5 text-red-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+                    </svg>
+                    <span class="text-gray-700">Contains special character (!@#$%^&*)</span>
+                  </div>
+                </div>
+                {% elif field.help_text and field.name != 'password2' %}
                   <p class="mt-1 text-xs text-gray-500">{{ field.help_text }}</p>
                 {% endif %}
               </div>
@@ -130,6 +165,83 @@
     </p>
   </div>
 </div>
+
+<script>
+  // Dynamic password validation
+  document.addEventListener('DOMContentLoaded', function() {
+    const passwordInput = document.getElementById('id_password1');
+    const requirementsDiv = document.getElementById('password-requirements');
+    
+    if (!passwordInput || !requirementsDiv) return;
+    
+    const requirements = {
+      length: { element: document.getElementById('req-length'), test: (pw) => pw.length >= 8 },
+      lowercase: { element: document.getElementById('req-lowercase'), test: (pw) => /[a-z]/.test(pw) },
+      uppercase: { element: document.getElementById('req-uppercase'), test: (pw) => /[A-Z]/.test(pw) },
+      number: { element: document.getElementById('req-number'), test: (pw) => /[0-9]/.test(pw) },
+      special: { element: document.getElementById('req-special'), test: (pw) => /[!@#$%^&*(),.?":{}|<>]/.test(pw) }
+    };
+    
+    passwordInput.addEventListener('input', function() {
+      const password = this.value;
+      
+      // Show requirements when user starts typing
+      if (password.length > 0) {
+        requirementsDiv.classList.remove('hidden');
+      } else {
+        requirementsDiv.classList.add('hidden');
+        return;
+      }
+      
+      // Check each requirement
+      Object.keys(requirements).forEach(key => {
+        const req = requirements[key];
+        const isMet = req.test(password);
+        const svg = req.element.querySelector('svg');
+        const span = req.element.querySelector('span');
+        
+        if (isMet) {
+          // Requirement met - green checkmark
+          svg.innerHTML = `<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" />`;
+          svg.classList.remove('text-red-500');
+          svg.classList.add('text-green-600');
+          span.classList.add('line-through', 'text-gray-400');
+          span.classList.remove('text-gray-700');
+          
+          // Fade out after a brief moment
+          setTimeout(() => {
+            req.element.style.opacity = '0.5';
+            req.element.style.maxHeight = '0';
+            req.element.style.marginTop = '0';
+            req.element.style.marginBottom = '0';
+            req.element.style.overflow = 'hidden';
+          }, 300);
+        } else {
+          // Requirement not met - red X
+          svg.innerHTML = `<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />`;
+          svg.classList.remove('text-green-600');
+          svg.classList.add('text-red-500');
+          span.classList.remove('line-through', 'text-gray-400');
+          span.classList.add('text-gray-700');
+          
+          // Reset visibility
+          req.element.style.opacity = '1';
+          req.element.style.maxHeight = '100px';
+          req.element.style.marginTop = '';
+          req.element.style.marginBottom = '';
+          req.element.style.overflow = 'visible';
+        }
+      });
+    });
+    
+    // Show requirements when field is focused
+    passwordInput.addEventListener('focus', function() {
+      if (this.value.length > 0) {
+        requirementsDiv.classList.remove('hidden');
+      }
+    });
+  });
+</script>
 {% endblock %}
 
 
