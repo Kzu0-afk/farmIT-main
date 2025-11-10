@@ -1,51 +1,269 @@
 {% extends 'base.html' %}
 {% block content %}
-<div class="max-w-6xl mx-auto">
-  <h1 class="text-3xl font-bold mb-6">Admin Dashboard</h1>
+<div class="bg-gradient-to-b from-green-50 via-white to-amber-50 -mx-4 -my-6 px-4 py-8 min-h-screen">
+  <div class="max-w-7xl mx-auto">
+    
+    <!-- Header Section -->
+    <div class="mb-8">
+      <div class="flex items-center justify-between mb-2">
+        <div>
+          <h1 class="text-4xl font-bold text-gray-900 flex items-center">
+            <svg class="w-10 h-10 text-green-700 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
+            </svg>
+            Admin Dashboard
+          </h1>
+          <p class="text-gray-600 mt-1 ml-13">Platform overview and key metrics</p>
+        </div>
+        <a href="/admin/" class="bg-gradient-to-r from-green-600 to-green-700 hover:from-green-700 hover:to-green-800 text-white font-semibold px-6 py-3 rounded-lg shadow-md hover:shadow-lg transition duration-200 flex items-center space-x-2">
+          <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z" />
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+          </svg>
+          <span>Django Admin</span>
+        </a>
+      </div>
+    </div>
 
-  <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-8">
-    <div class="bg-white p-5 rounded shadow border-t-4 border-green-600">
-      <div class="text-sm text-gray-500">Total Products</div>
-      <div class="text-2xl font-bold">{{ total_products }}</div>
-    </div>
-    <div class="bg-white p-5 rounded shadow border-t-4 border-blue-600">
-      <div class="text-sm text-gray-500">Approved / Pending</div>
-      <div class="text-2xl font-bold">{{ approved_products }} / {{ pending_products }}</div>
-    </div>
-    <div class="bg-white p-5 rounded shadow border-t-4 border-amber-600">
-      <div class="text-sm text-gray-500">Reserved</div>
-      <div class="text-2xl font-bold">{{ reserved_products }}</div>
-    </div>
-    <div class="bg-white p-5 rounded shadow border-t-4 border-gray-600">
-      <div class="text-sm text-gray-500">Users</div>
-      <div class="text-2xl font-bold">{{ total_users }}</div>
-    </div>
-    <div class="bg-white p-5 rounded shadow border-t-4 border-green-800">
-      <div class="text-sm text-gray-500">Open Interests</div>
-      <div class="text-2xl font-bold">{{ total_interests }}</div>
-    </div>
-  </div>
+    <!-- Stats Cards Grid -->
+    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mb-8">
+      
+      <!-- Total Products Card -->
+      <div class="bg-white rounded-xl shadow-lg hover:shadow-xl transition duration-300 overflow-hidden">
+        <div class="bg-gradient-to-r from-green-600 to-green-700 h-2"></div>
+        <div class="p-6">
+          <div class="flex items-center justify-between mb-4">
+            <div class="w-14 h-14 bg-green-100 rounded-full flex items-center justify-center">
+              <svg class="w-7 h-7 text-green-700" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4" />
+              </svg>
+            </div>
+            <div class="text-right">
+              <div class="text-3xl font-bold text-gray-900">{{ total_products }}</div>
+              <div class="text-sm text-gray-500 font-semibold">Total Products</div>
+            </div>
+          </div>
+          <div class="flex items-center text-xs text-green-700 font-semibold">
+            <svg class="w-4 h-4 mr-1" fill="currentColor" viewBox="0 0 20 20">
+              <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd" />
+            </svg>
+            All listings in system
+          </div>
+        </div>
+      </div>
 
-  <h2 class="text-xl font-semibold mb-3">Top Locations</h2>
-  <div class="bg-white rounded shadow p-4">
-    <table class="w-full text-left">
-      <thead>
-        <tr class="text-gray-600 text-sm">
-          <th class="py-2">Location</th>
-          <th class="py-2">Listings</th>
-        </tr>
-      </thead>
-      <tbody>
-        {% for r in top_locations %}
-        <tr class="border-t">
-          <td class="py-2">{{ r.location }}</td>
-          <td class="py-2">{{ r.c }}</td>
-        </tr>
-        {% empty %}
-        <tr><td class="py-2 text-gray-500" colspan="2">No data</td></tr>
-        {% endfor %}
-      </tbody>
-    </table>
+      <!-- Approved/Pending Card -->
+      <div class="bg-white rounded-xl shadow-lg hover:shadow-xl transition duration-300 overflow-hidden">
+        <div class="bg-gradient-to-r from-blue-600 to-blue-700 h-2"></div>
+        <div class="p-6">
+          <div class="flex items-center justify-between mb-4">
+            <div class="w-14 h-14 bg-blue-100 rounded-full flex items-center justify-center">
+              <svg class="w-7 h-7 text-blue-700" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+              </svg>
+            </div>
+            <div class="text-right">
+              <div class="text-3xl font-bold text-gray-900">{{ approved_products }} / {{ pending_products }}</div>
+              <div class="text-sm text-gray-500 font-semibold">Approved / Pending</div>
+            </div>
+          </div>
+          <div class="flex items-center justify-between text-xs">
+            <span class="text-blue-700 font-semibold flex items-center">
+              <svg class="w-4 h-4 mr-1" fill="currentColor" viewBox="0 0 20 20">
+                <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd" />
+              </svg>
+              {{ approved_products }} approved
+            </span>
+            {% if pending_products > 0 %}
+            <span class="text-red-600 font-semibold flex items-center">
+              <svg class="w-4 h-4 mr-1" fill="currentColor" viewBox="0 0 20 20">
+                <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z" clip-rule="evenodd" />
+              </svg>
+              {{ pending_products }} pending
+            </span>
+            {% else %}
+            <span class="text-gray-400 font-semibold">All approved</span>
+            {% endif %}
+          </div>
+        </div>
+      </div>
+
+      <!-- Reserved Card -->
+      <div class="bg-white rounded-xl shadow-lg hover:shadow-xl transition duration-300 overflow-hidden">
+        <div class="bg-gradient-to-r from-amber-600 to-amber-700 h-2"></div>
+        <div class="p-6">
+          <div class="flex items-center justify-between mb-4">
+            <div class="w-14 h-14 bg-amber-100 rounded-full flex items-center justify-center">
+              <svg class="w-7 h-7 text-amber-700" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />
+              </svg>
+            </div>
+            <div class="text-right">
+              <div class="text-3xl font-bold text-gray-900">{{ reserved_products }}</div>
+              <div class="text-sm text-gray-500 font-semibold">Reserved</div>
+            </div>
+          </div>
+          <div class="flex items-center text-xs text-amber-700 font-semibold">
+            <svg class="w-4 h-4 mr-1" fill="currentColor" viewBox="0 0 20 20">
+              <path fill-rule="evenodd" d="M5 9V7a5 5 0 0110 0v2a2 2 0 012 2v5a2 2 0 01-2 2H5a2 2 0 01-2-2v-5a2 2 0 012-2zm8-2v2H7V7a3 3 0 016 0z" clip-rule="evenodd" />
+            </svg>
+            Products currently reserved
+          </div>
+        </div>
+      </div>
+
+      <!-- Users Card -->
+      <div class="bg-white rounded-xl shadow-lg hover:shadow-xl transition duration-300 overflow-hidden">
+        <div class="bg-gradient-to-r from-gray-600 to-gray-700 h-2"></div>
+        <div class="p-6">
+          <div class="flex items-center justify-between mb-4">
+            <div class="w-14 h-14 bg-gray-100 rounded-full flex items-center justify-center">
+              <svg class="w-7 h-7 text-gray-700" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z" />
+              </svg>
+            </div>
+            <div class="text-right">
+              <div class="text-3xl font-bold text-gray-900">{{ total_users }}</div>
+              <div class="text-sm text-gray-500 font-semibold">Users</div>
+            </div>
+          </div>
+          <div class="flex items-center text-xs text-gray-700 font-semibold">
+            <svg class="w-4 h-4 mr-1" fill="currentColor" viewBox="0 0 20 20">
+              <path d="M9 6a3 3 0 11-6 0 3 3 0 016 0zM17 6a3 3 0 11-6 0 3 3 0 016 0zM12.93 17c.046-.327.07-.66.07-1a6.97 6.97 0 00-1.5-4.33A5 5 0 0119 16v1h-6.07zM6 11a5 5 0 015 5v1H1v-1a5 5 0 015-5z" />
+            </svg>
+            Registered farmers & buyers
+          </div>
+        </div>
+      </div>
+
+      <!-- Open Interests Card -->
+      <div class="bg-white rounded-xl shadow-lg hover:shadow-xl transition duration-300 overflow-hidden">
+        <div class="bg-gradient-to-r from-green-700 to-green-800 h-2"></div>
+        <div class="p-6">
+          <div class="flex items-center justify-between mb-4">
+            <div class="w-14 h-14 bg-green-100 rounded-full flex items-center justify-center">
+              <svg class="w-7 h-7 text-green-800" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z" />
+              </svg>
+            </div>
+            <div class="text-right">
+              <div class="text-3xl font-bold text-gray-900">{{ total_interests }}</div>
+              <div class="text-sm text-gray-500 font-semibold">Open Interests</div>
+            </div>
+          </div>
+          <div class="flex items-center text-xs text-green-800 font-semibold">
+            <svg class="w-4 h-4 mr-1" fill="currentColor" viewBox="0 0 20 20">
+              <path fill-rule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z" clip-rule="evenodd" />
+            </svg>
+            Awaiting farmer response
+          </div>
+        </div>
+      </div>
+
+    </div>
+
+    <!-- Top Locations Section -->
+    <div class="bg-white rounded-xl shadow-lg overflow-hidden">
+      <div class="bg-gradient-to-r from-green-600 to-green-700 px-6 py-4">
+        <h2 class="text-2xl font-bold text-white flex items-center">
+          <svg class="w-6 h-6 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" />
+          </svg>
+          Top Locations
+        </h2>
+        <p class="text-green-50 text-sm mt-1">Most active farming regions</p>
+      </div>
+      
+      <div class="p-6">
+        {% if top_locations %}
+        <div class="overflow-x-auto">
+          <table class="w-full">
+            <thead>
+              <tr class="border-b-2 border-gray-200">
+                <th class="text-left py-3 px-4 text-sm font-bold text-gray-700 uppercase tracking-wider">Location</th>
+                <th class="text-right py-3 px-4 text-sm font-bold text-gray-700 uppercase tracking-wider">Listings</th>
+                <th class="text-right py-3 px-4 text-sm font-bold text-gray-700 uppercase tracking-wider">Activity</th>
+              </tr>
+            </thead>
+            <tbody>
+              {% for r in top_locations %}
+              <tr class="border-b border-gray-100 hover:bg-green-50 transition duration-150">
+                <td class="py-4 px-4">
+                  <div class="flex items-center">
+                    <div class="w-10 h-10 bg-green-100 rounded-full flex items-center justify-center mr-3">
+                      <svg class="w-5 h-5 text-green-700" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" />
+                      </svg>
+                    </div>
+                    <span class="font-semibold text-gray-900">{{ r.location }}</span>
+                  </div>
+                </td>
+                <td class="py-4 px-4 text-right">
+                  <span class="inline-flex items-center bg-green-100 text-green-800 text-sm font-bold px-3 py-1 rounded-full">
+                    {{ r.c }}
+                  </span>
+                </td>
+                <td class="py-4 px-4 text-right">
+                  <div class="flex items-center justify-end">
+                    <div class="w-32 bg-gray-200 rounded-full h-2 mr-3">
+                      <div class="bg-gradient-to-r from-green-600 to-green-700 h-2 rounded-full" style="width: {% widthratio r.c total_products 100 %}%"></div>
+                    </div>
+                    <span class="text-xs font-semibold text-gray-600">{% widthratio r.c total_products 100 %}%</span>
+                  </div>
+                </td>
+              </tr>
+              {% endfor %}
+            </tbody>
+          </table>
+        </div>
+        {% else %}
+        <div class="text-center py-12">
+          <svg class="w-16 h-16 text-gray-300 mx-auto mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" />
+          </svg>
+          <p class="text-gray-500 text-lg font-semibold">No location data available</p>
+          <p class="text-gray-400 text-sm mt-2">Listings with locations will appear here</p>
+        </div>
+        {% endif %}
+      </div>
+    </div>
+
+    <!-- Quick Actions Footer -->
+    <div class="mt-8 grid grid-cols-1 md:grid-cols-3 gap-6">
+      <a href="/admin/products/product/" class="bg-gradient-to-br from-green-600 to-green-700 hover:from-green-700 hover:to-green-800 text-white rounded-xl shadow-lg hover:shadow-xl p-6 transition duration-300 flex items-center justify-between group">
+        <div>
+          <div class="text-sm font-semibold text-green-100 mb-1">Manage</div>
+          <div class="text-2xl font-bold">Products</div>
+        </div>
+        <svg class="w-10 h-10 text-green-200 group-hover:text-white transition duration-200" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4" />
+        </svg>
+      </a>
+
+      <a href="/admin/products/transaction/" class="bg-gradient-to-br from-amber-600 to-amber-700 hover:from-amber-700 hover:to-amber-800 text-white rounded-xl shadow-lg hover:shadow-xl p-6 transition duration-300 flex items-center justify-between group">
+        <div>
+          <div class="text-sm font-semibold text-amber-100 mb-1">View</div>
+          <div class="text-2xl font-bold">Transactions</div>
+        </div>
+        <svg class="w-10 h-10 text-amber-200 group-hover:text-white transition duration-200" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-3 7h3m-3 4h3m-6-4h.01M9 16h.01" />
+        </svg>
+      </a>
+
+      <a href="/admin/users/farmeruser/" class="bg-gradient-to-br from-gray-600 to-gray-700 hover:from-gray-700 hover:to-gray-800 text-white rounded-xl shadow-lg hover:shadow-xl p-6 transition duration-300 flex items-center justify-between group">
+        <div>
+          <div class="text-sm font-semibold text-gray-100 mb-1">Manage</div>
+          <div class="text-2xl font-bold">Users</div>
+        </div>
+        <svg class="w-10 h-10 text-gray-200 group-hover:text-white transition duration-200" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z" />
+        </svg>
+      </a>
+    </div>
+
   </div>
 </div>
 {% endblock %}
