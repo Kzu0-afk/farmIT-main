@@ -180,13 +180,15 @@ Backend (Django on Railway) ↔ Supabase (Database)
 - [ ] Admin dashboard (moderation and analytics)
 - [ ] Simple transaction model (buyer interest, reservation)
 
-### **Phase 3 (Refactored): Roles, Chat MVP, Farm Pages, Marketplace Highlights (Weeks 8–10)**
+### **Phase 3 (CRUCIAL FEATS): Roles, Chat MVP, Farm Pages, Marketplace Highlights, Maps (Weeks 8–10)**
+- NOTE: Supabase database integration and hosting are paused during this phase and moved to Phase 4.
 - [ ] Role selection at registration (Customer/Farmer) and role-based redirects
 - [ ] Customer: marketplace-first landing, no product CRUD; chat entry points
 - [ ] Farmer: virtual farm page creation and management; product management under farm
 - [ ] Chat MVP: customer-initiated conversations, farmer replies; message center
 - [ ] Marketplace highlights: farm cards with top products and rating snapshots
 - [ ] Security: permission gates by role, rate-limit chat creation, content sanitization
+- [ ] Maps & Delivery Planning: addresses/locations, distance/ETA, delivery quoting, map display
 
 ### **Phase 4: Cloud Database & Hosting (Shifted) (Weeks 11–12)**
 - [ ] Django backend setup with Supabase PostgreSQL connection
@@ -231,11 +233,11 @@ If validated regionally, FarmIt can evolve into:
 |------------|-----------|------------|
 | **Backend** | Django | Fast prototyping, built-in CRUD, scalable; easy role-based permissions |
 | **Frontend** | Tailwind | Lightweight, modern, responsive |
-| **Database** | Supabase | Easy PostgreSQL + file storage |
+| **Database** | Supabase (Phase 4) | Paused in Phase 3; enable in Phase 4 |
 | **Frontend Hosting** | Vercel | Simple deployment for small-medium web apps |
 | **Backend Hosting** | Railway | Free-tier support, smooth Django integration |
 | **Scope** | Small-to-Midscale MVP | Focus on local validation first |
-| **Next Step** | Implement Phase 3 refactor | Roles, chat MVP, farm pages, marketplace highlights |
+| **Next Step** | Implement Phase 3 CRUCIAL FEATS | Roles, chat MVP, farm pages, marketplace highlights, maps |
 
 ---
 
@@ -246,7 +248,7 @@ If validated regionally, FarmIt can evolve into:
 
 ---
 
-## 🔧 Phase 3 Refactor — Implementation Plan (Tied to Current Code)
+## 🔧 Phase 3 (CRUCIAL FEATS) — Implementation Plan (Tied to Current Code)
 
 ### Current Status (as of today)
 - Custom user model `users.FarmerUser` in use (`AUTH_USER_MODEL` set)
@@ -271,6 +273,25 @@ If validated regionally, FarmIt can evolve into:
 - Marketplace & Reviews
   - Add `Review` on `Farm` by customers; compute average rating and counts
   - Marketplace queries: highlight farms (avg rating, review count, popular products)
+- Maps & Delivery (MVP, FoodPanda-style planning)
+  - Models:
+    - `Address`: `user` (FK), `label`, `line1`, `barangay`, `city`, `province`, `postal_code`, `country`, `latitude`, `longitude`, `is_default`
+    - `DeliveryRequest`: `id`, `customer` (FK), `farm` (FK), `pickup_address` (farm-derived), `dropoff_address` (FK → Address), `distance_km`, `eta_minutes`, `quoted_fee`, `status`, `created_at`
+    - `RouteSnapshot` (optional): `delivery_request` (FK), `polyline`, `provider`, `raw_response_json`
+  - APIs/Endpoints (Django views/DRF):
+    - POST `/deliveries/quote/` → input: farm_id + address_id or freeform address; output: `distance`, `eta`, `fee`
+    - POST `/deliveries/create/` → locks quote to a request (status = `PENDING`)
+    - GET `/deliveries/:id/` → details incl. route polyline for map display
+  - Pricing (configurable): base fee + per-km rate, surge multiplier (future)
+  - Providers/Options:
+    - Google Maps Platform: Geocoding, Distance Matrix, Directions, Maps JS
+    - Mapbox: Geocoding, Directions Matrix, GL JS (good free tier)
+    - OpenStreetMap + OSRM/OpenRouteService: open data; hosted/self-host options
+  - MVP Strategy (recommended):
+    - Use Mapbox for tiles + routes; abstract provider to allow switching later
+  - Security & Privacy:
+    - Secure address storage; PH bounds validation; rate-limit quoting
+    - Keep provider keys server-side; issue minimal client tokens for map SDKs
 - Security
   - Role-based decorators/permissions on views
   - CSRF protection (existing), session management (existing)
@@ -287,19 +308,24 @@ If validated regionally, FarmIt can evolve into:
   - Product Detail: “Chat with Farmer” button for customers
   - Chat: simple inbox and thread view (polling), upgrade to realtime later
   - Marketplace: filters (existing) + top farms section (rating and top products)
+  - Maps/Delivery:
+    - Customer address book with geocoding autocomplete
+    - “Get Delivery Quote” on product/farm → distance, ETA, fee
+    - Map preview with route polyline (farm → customer)
 
 ### Data Migration Steps
 1) Add `role` to `users.FarmerUser` (default `FARMER`) + create profiles
 2) Create `Farm` for each existing farmer
 3) Add `farm` FK to `Product` (nullable) and backfill via farmer’s farm
 4) Make `farm` non-null; plan to drop legacy `farmer_id` later
-5) Create `Conversation`, `Message`, `Review` tables
-6) Add indexes for filters and highlights
+5) Create `Conversation`, `Message`, `Review`, `Address`, `DeliveryRequest` tables
+6) Add indexes for filters and highlights; spatial-friendly indexes on `(latitude, longitude)`
 
 ### Performance & Future Work
 - Add queryset prefetch/select_related in marketplace and farm pages
 - Cache rating aggregates per farm (denormalized fields or cached properties)
 - Upgrade chat to Django Channels (WebSockets) in Phase 4+
+- Cache distance/ETA quotes by `(farm_id, lat, lng)` with short TTL; dedupe calls
 
 ### Compliance with Rules
 - Infrastructure: aligns to project goals and existing Django stack
