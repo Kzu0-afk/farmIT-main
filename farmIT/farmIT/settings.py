@@ -58,6 +58,8 @@ INSTALLED_APPS = [
 
 MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',
+    # Static files for production (serves STATIC_ROOT)
+    'whitenoise.middleware.WhiteNoiseMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
     'django.middleware.common.CommonMiddleware',
     'django.middleware.csrf.CsrfViewMiddleware',
@@ -98,6 +100,22 @@ DATABASES = {
     }
 }
 
+# Optionally use DATABASE_URL (e.g., Supabase/Railway). Falls back to SQLite if unset.
+_database_url = os.getenv('DATABASE_URL')
+if _database_url:
+    try:
+        import dj_database_url  # type: ignore
+        conn_max_age = int(os.getenv('DB_CONN_MAX_AGE', '600'))
+        ssl_require = os.getenv('DB_SSL_REQUIRE', 'true').lower() in ('1', 'true', 'yes')
+        DATABASES['default'] = dj_database_url.parse(
+            _database_url,
+            conn_max_age=conn_max_age,
+            ssl_require=ssl_require,
+        )
+    except Exception:
+        # Stay on SQLite to avoid breaking local dev if parsing/import fails
+        pass
+
 
 # Password validation
 # https://docs.djangoproject.com/en/5.2/ref/settings/#auth-password-validators
@@ -134,6 +152,11 @@ USE_TZ = True
 # https://docs.djangoproject.com/en/5.2/howto/static-files/
 
 STATIC_URL = 'static/'
+STATIC_ROOT = BASE_DIR / 'staticfiles'
+STATICFILES_DIRS = [BASE_DIR / 'static'] if (BASE_DIR / 'static').exists() else []
+
+# WhiteNoise compression/manifest for cache-busting in production
+STATICFILES_STORAGE = 'whitenoise.storage.CompressedManifestStaticFilesStorage'
 
 # Local memory cache used by rate limiting middleware
 CACHES = {
