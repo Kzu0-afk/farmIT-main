@@ -1,16 +1,23 @@
-from django.contrib.auth.decorators import login_required
 from django.contrib.admin.views.decorators import staff_member_required
-from django.db.models import Q, Count
+from django.contrib.auth.decorators import login_required
+from django.db.models import Count, Q
 from django.http import HttpRequest, HttpResponse, HttpResponseForbidden
 from django.shortcuts import get_object_or_404, redirect, render
+from users.models import FarmerUser
 
-from .forms import ProductForm
-from .models import Product, Transaction
+from .forms import ProductForm, FarmForm
+from .models import Product, Transaction, Farm
 
 
 def landing_page(request: HttpRequest) -> HttpResponse:
-    """Landing page with hero section and info about FarmIT"""
-    return render(request, 'products/landing_page.html')
+    """Landing page with hero section and info about FarmIT.
+
+    For logged-in customers, we treat the marketplace as their primary home.
+    """
+    user = request.user
+    if getattr(user, "is_authenticated", False) and getattr(user, "is_customer", False):
+        return redirect("product_list")
+    return render(request, "products/landing_page.html")
 
 
 def product_list(request: HttpRequest) -> HttpResponse:
@@ -64,11 +71,19 @@ def product_detail(request: HttpRequest, pk: int) -> HttpResponse:
 
 @login_required
 def product_create(request: HttpRequest) -> HttpResponse:
+    # Only farmer accounts are allowed to create listings.
+    if not getattr(request.user, "is_farmer", False):
+        return HttpResponseForbidden("Only farmer accounts can create product listings.")
+
     if request.method == 'POST':
         form = ProductForm(request.POST)
         if form.is_valid():
             product = form.save(commit=False)
             product.farmer = request.user
+            # Ensure product is associated with this farmer's farm if available.
+            farm = getattr(request.user, "farm", None)
+            if farm:
+                product.farm = farm
             product.save()
             return redirect('product_detail', pk=product.pk)
     else:
@@ -78,6 +93,9 @@ def product_create(request: HttpRequest) -> HttpResponse:
 
 @login_required
 def product_update(request: HttpRequest, pk: int) -> HttpResponse:
+    if not getattr(request.user, "is_farmer", False):
+        return HttpResponseForbidden("Only farmer accounts can manage product listings.")
+
     product = get_object_or_404(Product, pk=pk, farmer=request.user)
     if request.method == 'POST':
         form = ProductForm(request.POST, instance=product)
@@ -91,6 +109,9 @@ def product_update(request: HttpRequest, pk: int) -> HttpResponse:
 
 @login_required
 def product_delete(request: HttpRequest, pk: int) -> HttpResponse:
+    if not getattr(request.user, "is_farmer", False):
+        return HttpResponseForbidden("Only farmer accounts can manage product listings.")
+
     product = get_object_or_404(Product, pk=pk, farmer=request.user)
     if request.method == 'POST':
         product.delete()
@@ -151,3 +172,56 @@ def admin_dashboard(request: HttpRequest) -> HttpResponse:
         'total_interests': total_interests,
         'top_locations': top_locations,
     })
+
+
+@login_required
+def my_farm(request: HttpRequest) -> HttpResponse:
+    """Farmer-only management page for their virtual farm."""
+    if not getattr(request.user, "is_farmer", False):
+        return HttpResponseForbidden("Only farmer accounts can access farm management.")
+
+    farm, _created = Farm.objects.get_or_create(
+        farmer=request.user,
+        defaults={
+            "name": f"{request.user.username}'s Farm" if request.user.username else "My Farm",
+            "location": request.user.location,
+        },
+    )
+
+    # Keep products in sync with this farm reference.
+    Product.objects.filter(farmer=request.user, farm__isnull=True).update(farm=farm)
+
+    if request.method == "POST":
+        form = FarmForm(request.POST, instance=farm)
+        if form.is_valid():
+            form.save()
+            return redirect("my_farm")
+    else:
+        form = FarmForm(instance=farm)
+
+    products = Product.objects.filter(farmer=request.user).order_by("-created_at")
+
+    return render(
+        request,
+        "products/my_farm.html",
+        {
+            "farm": farm,
+            "form": form,
+            "products": products,
+        },
+    )
+
+
+def farm_detail(request: HttpRequest, slug: str) -> HttpResponse:
+    """Public-facing farm page with its approved products."""
+    farm = get_object_or_404(Farm, slug=slug)
+    products = Product.objects.filter(farm=farm, is_approved=True)
+
+    return render(
+        request,
+        "products/farm_detail.html",
+        {
+            "farm": farm,
+            "products": products,
+        },
+    )

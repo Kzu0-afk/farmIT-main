@@ -1,0 +1,70 @@
+{% extends 'base.html' %}
+{% block content %}
+<div class="bg-gradient-to-b from-green-50 to-white min-h-screen py-8 px-4">
+  <div class="max-w-3xl mx-auto">
+    <div class="flex items-center justify-between mb-4">
+      <div>
+        <a href="{% url 'chat_inbox' %}" class="inline-flex items-center text-green-700 hover:text-green-800 text-sm mb-1">
+          <svg class="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18" />
+          </svg>
+          Back to Messages
+        </a>
+        <h1 class="text-xl font-bold text-gray-900">
+          {% if user.id == conversation.farmer_id %}
+            Chat with {{ conversation.customer.username }}
+          {% else %}
+            Chat with {{ conversation.farmer.username }}
+          {% endif %}
+        </h1>
+        {% if conversation.product %}
+        <p class="text-xs text-gray-500 mt-1">
+          Regarding:
+          <a href="{% url 'product_detail' pk=conversation.product.id %}" class="text-green-700 hover:underline">
+            {{ conversation.product.product_name }}
+          </a>
+        </p>
+        {% endif %}
+      </div>
+    </div>
+
+    <div class="bg-white rounded-xl shadow-lg border border-gray-200 flex flex-col h-[60vh]">
+      <!-- Messages -->
+      <div class="flex-1 overflow-y-auto px-4 py-3 space-y-3">
+        {% for m in messages %}
+        <div class="flex {% if m.sender_id == user.id %}justify-end{% else %}justify-start{% endif %}">
+          <div class="max-w-xs md:max-w-md px-3 py-2 rounded-2xl text-sm {% if m.sender_id == user.id %}bg-green-600 text-white rounded-br-sm{% else %}bg-gray-100 text-gray-900 rounded-bl-sm{% endif %}">
+            <p class="whitespace-pre-line break-words">{{ m.body }}</p>
+            <div class="mt-1 text-[10px] opacity-75 text-right">
+              {{ m.created_at|date:"M d, H:i" }}
+            </div>
+          </div>
+        </div>
+        {% empty %}
+        <div class="text-center text-gray-500 text-sm mt-8">
+          No messages yet. Send the first message to start the conversation.
+        </div>
+        {% endfor %}
+      </div>
+
+      <!-- Composer -->
+      <form method="post" class="border-t border-gray-200 p-3">
+        {% csrf_token %}
+        <div class="flex items-end space-x-2">
+          <div class="flex-1">
+            {{ form.body }}
+          </div>
+          <button type="submit" class="bg-gradient-to-r from-green-600 to-green-700 hover:from-green-700 hover:to-green-800 text-white font-semibold px-4 py-2 rounded-lg shadow-md hover:shadow-lg text-sm flex items-center space-x-1">
+            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" />
+            </svg>
+            <span>Send</span>
+          </button>
+        </div>
+      </form>
+    </div>
+  </div>
+</div>
+{% endblock %}
+
+
