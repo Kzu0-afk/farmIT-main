@@ -1,40 +1,83 @@
 {% extends 'base.html' %}
 {% block content %}
-<div class="bg-gradient-to-b from-green-50 to-white min-h-screen py-8 px-4">
-  <div class="max-w-4xl mx-auto">
-    <div class="flex items-center justify-between mb-6">
-      <h1 class="text-2xl font-bold text-gray-900">Messages</h1>
+<div class="bg-gradient-to-b from-green-50 via-white to-green-50 min-h-screen py-8 px-4">
+  <div class="max-w-5xl mx-auto">
+    
+    <!-- Header -->
+    <div class="flex items-center justify-between mb-8">
+      <div class="flex items-center space-x-3">
+        <div class="bg-gradient-to-br from-green-600 to-green-700 p-3 rounded-xl shadow-md">
+          <svg class="w-7 h-7 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z" />
+          </svg>
+        </div>
+        <div>
+          <h1 class="text-3xl font-bold text-gray-900">Messages</h1>
+          <p class="text-sm text-gray-600">Your conversations with {% if user.is_farmer %}customers{% else %}farmers{% endif %}</p>
+        </div>
+      </div>
     </div>
 
-    <div class="bg-white rounded-xl shadow-lg border border-gray-200 divide-y">
+    <!-- Conversations List -->
+    <div class="bg-white rounded-2xl shadow-xl border border-gray-200 overflow-hidden">
       {% for c in conversations %}
-      <a href="{% url 'chat_conversation_detail' pk=c.id %}" class="flex items-center justify-between px-4 py-3 hover:bg-green-50 transition duration-150">
-        <div>
-          <div class="flex items-center space-x-2">
-            <span class="font-semibold text-gray-900">
-              {% if user.id == c.farmer_id %}
-                {{ c.customer.username }}
-              {% else %}
-                {{ c.farmer.username }}
-              {% endif %}
-            </span>
-            {% if c.product %}
-            <span class="text-xs text-gray-500">• {{ c.product.product_name }}</span>
-            {% endif %}
+      <a href="{% url 'chat_conversation_detail' pk=c.id %}" class="flex items-center justify-between px-6 py-5 hover:bg-gradient-to-r hover:from-green-50 hover:to-amber-50 transition-all duration-200 border-b border-gray-100 last:border-b-0 group">
+        <div class="flex items-center space-x-4 flex-1">
+          <!-- Avatar -->
+          <div class="flex-shrink-0 w-12 h-12 bg-gradient-to-br from-green-100 to-green-50 rounded-full flex items-center justify-center border-2 border-green-200 group-hover:border-green-400 transition-colors">
+            <svg class="w-6 h-6 text-green-700" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
+            </svg>
           </div>
-          <div class="text-xs text-gray-500 mt-1">
-            Started {{ c.created_at|date:"M d, Y H:i" }}
+          
+          <!-- Conversation Info -->
+          <div class="flex-1 min-w-0">
+            <div class="flex items-center space-x-2 mb-1">
+              <span class="font-bold text-gray-900 text-lg truncate group-hover:text-green-700 transition-colors">
+                {% if user.id == c.farmer_id %}
+                  {{ c.customer.username }}
+                {% else %}
+                  {{ c.farmer.username }}
+                {% endif %}
+              </span>
+              {% if c.product %}
+              <span class="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium bg-amber-100 text-amber-800">
+                {{ c.product.product_name|truncatechars:20 }}
+              </span>
+              {% endif %}
+            </div>
+            <div class="text-sm text-gray-500">
+              Started {{ c.created_at|date:"M d, Y" }}
+            </div>
           </div>
         </div>
-        <div class="text-right">
-          <div class="text-xs text-gray-400">
-            Last activity {{ c.last_message_at|date:"M d, Y H:i" }}
+        
+        <!-- Time & Arrow -->
+        <div class="flex items-center space-x-4 ml-4">
+          <div class="text-right">
+            <div class="text-xs text-gray-400">Last activity</div>
+            <div class="text-sm font-medium text-gray-600">{{ c.last_message_at|date:"M d, H:i" }}</div>
           </div>
+          <svg class="w-5 h-5 text-gray-400 group-hover:text-green-600 group-hover:translate-x-1 transition-all" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" />
+          </svg>
         </div>
       </a>
       {% empty %}
-      <div class="px-4 py-8 text-center text-gray-500">
-        No conversations yet. As a customer, start a chat from a product or farm page.
+      <div class="px-6 py-16 text-center">
+        <div class="inline-flex items-center justify-center w-20 h-20 bg-gray-100 rounded-full mb-4">
+          <svg class="w-10 h-10 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z" />
+          </svg>
+        </div>
+        <h3 class="text-lg font-semibold text-gray-900 mb-2">No conversations yet</h3>
+        <p class="text-sm text-gray-500 max-w-sm mx-auto">
+          {% if user.is_customer %}
+            Start a chat from a product or farm page to connect with farmers.
+          {% else %}
+            Customers will reach out to you through your farm or product pages.
+          {% endif %}
+        </p>
       </div>
       {% endfor %}
     </div>
