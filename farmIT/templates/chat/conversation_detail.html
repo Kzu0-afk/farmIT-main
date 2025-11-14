@@ -1,62 +1,105 @@
 {% extends 'base.html' %}
 {% block content %}
-<div class="bg-gradient-to-b from-green-50 to-white min-h-screen py-8 px-4">
-  <div class="max-w-3xl mx-auto">
-    <div class="flex items-center justify-between mb-4">
-      <div>
-        <a href="{% url 'chat_inbox' %}" class="inline-flex items-center text-green-700 hover:text-green-800 text-sm mb-1">
-          <svg class="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18" />
-          </svg>
-          Back to Messages
-        </a>
-        <h1 class="text-xl font-bold text-gray-900">
-          {% if user.id == conversation.farmer_id %}
-            Chat with {{ conversation.customer.username }}
-          {% else %}
-            Chat with {{ conversation.farmer.username }}
-          {% endif %}
-        </h1>
-        {% if conversation.product %}
-        <p class="text-xs text-gray-500 mt-1">
-          Regarding:
-          <a href="{% url 'product_detail' pk=conversation.product.id %}" class="text-green-700 hover:underline">
-            {{ conversation.product.product_name }}
-          </a>
-        </p>
-        {% endif %}
+<div class="bg-gradient-to-b from-green-50 via-white to-green-50 min-h-screen py-8 px-4">
+  <div class="max-w-4xl mx-auto">
+    
+    <!-- Header -->
+    <div class="mb-6">
+      <a href="{% url 'chat_inbox' %}" class="inline-flex items-center text-green-700 hover:text-green-800 font-medium text-sm mb-3 transition-colors group">
+        <svg class="w-5 h-5 mr-1 group-hover:-translate-x-1 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18" />
+        </svg>
+        Back to Messages
+      </a>
+      
+      <div class="bg-white rounded-2xl shadow-lg border border-gray-200 px-6 py-4 flex items-center justify-between">
+        <div class="flex items-center space-x-4">
+          <!-- Avatar -->
+          <div class="w-14 h-14 bg-gradient-to-br from-green-100 to-green-50 rounded-full flex items-center justify-center border-2 border-green-200">
+            <svg class="w-7 h-7 text-green-700" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
+            </svg>
+          </div>
+          
+          <div>
+            <h1 class="text-2xl font-bold text-gray-900">
+              {% if user.id == conversation.farmer_id %}
+                {{ conversation.customer.username }}
+              {% else %}
+                {{ conversation.farmer.username }}
+              {% endif %}
+            </h1>
+            {% if conversation.product %}
+            <p class="text-sm text-gray-600 mt-1 flex items-center">
+              <span class="text-gray-500">Regarding:</span>
+              <a href="{% url 'product_detail' pk=conversation.product.id %}" class="ml-1 text-green-700 hover:text-green-800 font-medium hover:underline flex items-center">
+                {{ conversation.product.product_name }}
+                <svg class="w-4 h-4 ml-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14" />
+                </svg>
+              </a>
+            </p>
+            {% endif %}
+          </div>
+        </div>
+        
+        <!-- Status indicator -->
+        <div class="flex items-center space-x-2 text-sm text-gray-500">
+          <div class="w-2 h-2 bg-green-500 rounded-full animate-pulse"></div>
+          <span>Active</span>
+        </div>
       </div>
     </div>
 
-    <div class="bg-white rounded-xl shadow-lg border border-gray-200 flex flex-col h-[60vh]">
-      <!-- Messages -->
-      <div class="flex-1 overflow-y-auto px-4 py-3 space-y-3">
+    <!-- Chat Container -->
+    <div class="bg-white rounded-2xl shadow-xl border border-gray-200 flex flex-col h-[65vh]">
+      
+      <!-- Messages Area -->
+      <div class="flex-1 overflow-y-auto px-6 py-6 space-y-4 bg-gradient-to-b from-gray-50 to-white">
         {% for m in messages %}
-        <div class="flex {% if m.sender_id == user.id %}justify-end{% else %}justify-start{% endif %}">
-          <div class="max-w-xs md:max-w-md px-3 py-2 rounded-2xl text-sm {% if m.sender_id == user.id %}bg-green-600 text-white rounded-br-sm{% else %}bg-gray-100 text-gray-900 rounded-bl-sm{% endif %}">
-            <p class="whitespace-pre-line break-words">{{ m.body }}</p>
-            <div class="mt-1 text-[10px] opacity-75 text-right">
-              {{ m.created_at|date:"M d, H:i" }}
+        <div class="flex {% if m.sender_id == user.id %}justify-end{% else %}justify-start{% endif %} animate-fade-in">
+          <div class="max-w-xs md:max-w-lg">
+            <div class="{% if m.sender_id == user.id %}bg-gradient-to-br from-green-600 to-green-700 text-white rounded-2xl rounded-br-md{% else %}bg-white text-gray-900 rounded-2xl rounded-bl-md shadow-md border border-gray-200{% endif %} px-4 py-3">
+              <p class="whitespace-pre-line break-words text-sm leading-relaxed">{{ m.body }}</p>
+              <div class="mt-2 text-[10px] {% if m.sender_id == user.id %}text-green-100{% else %}text-gray-500{% endif %} flex items-center {% if m.sender_id == user.id %}justify-end{% else %}justify-start{% endif %}">
+                <svg class="w-3 h-3 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
+                </svg>
+                {{ m.created_at|date:"M d, H:i" }}
+              </div>
             </div>
           </div>
         </div>
         {% empty %}
-        <div class="text-center text-gray-500 text-sm mt-8">
-          No messages yet. Send the first message to start the conversation.
+        <div class="flex flex-col items-center justify-center h-full text-center py-12">
+          <div class="w-16 h-16 bg-gray-100 rounded-full flex items-center justify-center mb-4">
+            <svg class="w-8 h-8 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z" />
+            </svg>
+          </div>
+          <h3 class="text-lg font-semibold text-gray-900 mb-1">Start the conversation</h3>
+          <p class="text-sm text-gray-500">Send the first message to begin chatting.</p>
         </div>
         {% endfor %}
       </div>
 
-      <!-- Composer -->
-      <form method="post" class="border-t border-gray-200 p-3">
+      <!-- Message Composer -->
+      <form method="post" class="border-t-2 border-gray-100 p-4 bg-gray-50 rounded-b-2xl">
         {% csrf_token %}
-        <div class="flex items-end space-x-2">
+        <div class="flex items-end space-x-3">
           <div class="flex-1">
-            {{ form.body }}
+            <textarea 
+              name="body" 
+              id="id_body"
+              rows="2"
+              placeholder="Type your message here..." 
+              class="block w-full px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-green-600 focus:border-transparent resize-none transition duration-200 text-sm"
+              required
+            ></textarea>
           </div>
-          <button type="submit" class="bg-gradient-to-r from-green-600 to-green-700 hover:from-green-700 hover:to-green-800 text-white font-semibold px-4 py-2 rounded-lg shadow-md hover:shadow-lg text-sm flex items-center space-x-1">
-            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" />
+          <button type="submit" class="bg-gradient-to-r from-green-600 to-green-700 hover:from-green-700 hover:to-green-800 text-white font-semibold px-6 py-3 rounded-xl shadow-md hover:shadow-lg transition-all duration-200 flex items-center space-x-2 transform hover:-translate-y-0.5">
+            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 19l9 2-9-18-9 18 9-2zm0 0v-8" />
             </svg>
             <span>Send</span>
           </button>
@@ -65,6 +108,22 @@
     </div>
   </div>
 </div>
+
+<style>
+  @keyframes fade-in {
+    from {
+      opacity: 0;
+      transform: translateY(10px);
+    }
+    to {
+      opacity: 1;
+      transform: translateY(0);
+    }
+  }
+  .animate-fade-in {
+    animation: fade-in 0.3s ease-out;
+  }
+</style>
 {% endblock %}
 
 
