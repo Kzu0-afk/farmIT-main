@@ -1,0 +1,45 @@
+{% extends 'base.html' %}
+{% block content %}
+<div class="bg-gradient-to-b from-green-50 to-white min-h-screen py-8 px-4">
+  <div class="max-w-4xl mx-auto">
+    <div class="flex items-center justify-between mb-6">
+      <h1 class="text-2xl font-bold text-gray-900">Messages</h1>
+    </div>
+
+    <div class="bg-white rounded-xl shadow-lg border border-gray-200 divide-y">
+      {% for c in conversations %}
+      <a href="{% url 'chat_conversation_detail' pk=c.id %}" class="flex items-center justify-between px-4 py-3 hover:bg-green-50 transition duration-150">
+        <div>
+          <div class="flex items-center space-x-2">
+            <span class="font-semibold text-gray-900">
+              {% if user.id == c.farmer_id %}
+                {{ c.customer.username }}
+              {% else %}
+                {{ c.farmer.username }}
+              {% endif %}
+            </span>
+            {% if c.product %}
+            <span class="text-xs text-gray-500">• {{ c.product.product_name }}</span>
+            {% endif %}
+          </div>
+          <div class="text-xs text-gray-500 mt-1">
+            Started {{ c.created_at|date:"M d, Y H:i" }}
+          </div>
+        </div>
+        <div class="text-right">
+          <div class="text-xs text-gray-400">
+            Last activity {{ c.last_message_at|date:"M d, Y H:i" }}
+          </div>
+        </div>
+      </a>
+      {% empty %}
+      <div class="px-4 py-8 text-center text-gray-500">
+        No conversations yet. As a customer, start a chat from a product or farm page.
+      </div>
+      {% endfor %}
+    </div>
+  </div>
+</div>
+{% endblock %}
+
+

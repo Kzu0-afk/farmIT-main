@@ -1,0 +1,97 @@
+{% extends 'base.html' %}
+{% block content %}
+<div class="bg-gradient-to-b from-green-50 to-white min-h-screen py-8 px-4">
+  <div class="max-w-6xl mx-auto">
+
+    <!-- Farm header -->
+    <div class="bg-white rounded-2xl shadow-lg overflow-hidden border border-gray-200 mb-8">
+      {% if farm.banner_url %}
+      <div class="h-48 w-full overflow-hidden">
+        <img src="{{ farm.banner_url }}" alt="{{ farm.name }}" class="w-full h-full object-cover">
+      </div>
+      {% else %}
+      <div class="h-40 w-full bg-gradient-to-r from-green-700 to-green-600 flex items-center justify-center text-white">
+        <span class="text-2xl font-bold">{{ farm.name }}</span>
+      </div>
+      {% endif %}
+
+      <div class="p-6 flex flex-col md:flex-row md:items-center md:justify-between gap-4">
+        <div>
+          <h1 class="text-3xl font-bold text-gray-900 mb-2">{{ farm.name }}</h1>
+          {% if farm.location %}
+          <p class="flex items-center text-sm text-gray-600">
+            <svg class="w-4 h-4 mr-1 text-amber-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" />
+            </svg>
+            {{ farm.location }}
+          </p>
+          {% endif %}
+          {% if farm.description %}
+          <p class="mt-3 text-gray-700 text-sm leading-relaxed">{{ farm.description }}</p>
+          {% endif %}
+        </div>
+
+        <!-- Chat entry point -->
+        <div class="flex flex-col items-stretch space-y-2">
+          {% if user.is_authenticated and user.is_customer %}
+          <form method="post" action="{% url 'chat_start_farm' slug=farm.slug %}">
+            {% csrf_token %}
+            <button type="submit" class="w-full bg-gradient-to-r from-green-600 to-green-700 hover:from-green-700 hover:to-green-800 text-white font-semibold px-6 py-3 rounded-lg shadow-md hover:shadow-lg transition duration-200 flex items-center justify-center space-x-2">
+              <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 10h.01M12 10h.01M16 10h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z" />
+              </svg>
+              <span>Chat with Farmer</span>
+            </button>
+          </form>
+          {% elif not user.is_authenticated %}
+          <a href="/accounts/login/?next={% url 'farm_detail' slug=farm.slug %}" class="w-full bg-amber-50 border border-amber-200 text-amber-800 text-sm font-semibold px-4 py-3 rounded-lg flex items-center justify-center space-x-2 hover:bg-amber-100 transition duration-200">
+            <span>Login to chat with this farmer</span>
+          </a>
+          {% endif %}
+        </div>
+      </div>
+    </div>
+
+    <!-- Products -->
+    <div class="flex items-center justify-between mb-4">
+      <h2 class="text-2xl font-bold text-gray-900">Products from this Farm</h2>
+    </div>
+
+    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+      {% for p in products %}
+      <a href="{% url 'product_detail' pk=p.id %}" class="group block bg-white rounded-xl shadow-md hover:shadow-xl transition duration-300 overflow-hidden border border-gray-200 hover:border-green-500">
+        <div class="h-40 bg-gradient-to-br from-green-100 to-amber-50 flex items-center justify-center border-b border-gray-200">
+          {% if p.photo_url %}
+          <img src="{{ p.photo_url }}" alt="{{ p.product_name }}" class="w-full h-full object-cover" />
+          {% else %}
+          <svg class="w-16 h-16 text-green-600 opacity-50" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
+          </svg>
+          {% endif %}
+        </div>
+        <div class="p-4">
+          <div class="flex items-center justify-between mb-2">
+            <h3 class="font-semibold text-lg text-gray-900 group-hover:text-green-700 transition duration-200">
+              {{ p.product_name }}
+            </h3>
+            <span class="text-sm font-semibold text-green-700">₱{{ p.price }}</span>
+          </div>
+          <div class="flex items-center justify-between text-xs text-gray-500">
+            <span>{{ p.quantity }} units</span>
+            <span>{{ p.location }}</span>
+          </div>
+        </div>
+      </a>
+      {% empty %}
+      <div class="col-span-full text-center py-10">
+        <p class="text-gray-500">This farm has no approved products listed yet.</p>
+      </div>
+      {% endfor %}
+    </div>
+
+  </div>
+</div>
+{% endblock %}
+
+
