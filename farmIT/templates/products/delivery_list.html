@@ -1,0 +1,66 @@
+{% extends 'base.html' %}
+{% block content %}
+<div class="bg-gradient-to-b from-green-50 to-white min-h-screen py-8 px-4">
+  <div class="max-w-5xl mx-auto">
+    <h1 class="text-3xl font-bold text-gray-900 mb-6 flex items-center">
+      <svg class="w-7 h-7 text-green-700 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
+      </svg>
+      Delivery requests
+    </h1>
+
+    <div class="bg-white rounded-2xl shadow-lg border border-gray-200">
+      <div class="divide-y divide-gray-100">
+        {% for d in deliveries %}
+        <div class="p-5 flex flex-col md:flex-row md:items-center md:justify-between gap-3">
+          <div>
+            <div class="text-sm text-gray-500 mb-1">
+              {{ d.created_at|date:'M d, Y H:i' }}
+            </div>
+            <div class="font-semibold text-gray-900">
+              {{ d.farm.name }}
+            </div>
+            <div class="text-sm text-gray-600">
+              To: {{ d.dropoff_address.full_address }}
+            </div>
+          </div>
+          <div class="flex items-center gap-4">
+            <div class="text-right">
+              <div class="text-xs text-gray-500">Distance</div>
+              <div class="text-sm font-semibold text-gray-900">{{ d.distance_km }} km</div>
+            </div>
+            <div class="text-right">
+              <div class="text-xs text-gray-500">ETA</div>
+              <div class="text-sm font-semibold text-gray-900">{{ d.eta_minutes }} min</div>
+            </div>
+            <div class="text-right">
+              <div class="text-xs text-gray-500">Fee</div>
+              <div class="text-base font-bold text-green-700">₱{{ d.quoted_fee }}</div>
+            </div>
+            <div>
+              <span class="inline-flex items-center px-3 py-1 rounded-full text-xs font-semibold
+                {% if d.status == 'accepted' %}
+                  bg-green-100 text-green-800
+                {% elif d.status == 'cancelled' %}
+                  bg-red-100 text-red-800
+                {% else %}
+                  bg-amber-100 text-amber-800
+                {% endif %}
+              ">
+                {{ d.get_status_display }}
+              </span>
+            </div>
+          </div>
+        </div>
+        {% empty %}
+        <div class="p-10 text-center text-gray-500">
+          No delivery requests yet.
+        </div>
+        {% endfor %}
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}
+
+

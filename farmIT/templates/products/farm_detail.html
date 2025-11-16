@@ -30,6 +30,16 @@
           {% if farm.description %}
           <p class="mt-3 text-gray-700 text-sm leading-relaxed">{{ farm.description }}</p>
           {% endif %}
+
+          {% if review_count %}
+          <div class="mt-3 flex items-center text-sm text-gray-700">
+            <span class="mr-2 font-semibold">Rating:</span>
+            <span class="text-amber-500 mr-2">
+              ★ {{ avg_rating|floatformat:1 }}
+            </span>
+            <span class="text-xs text-gray-500">({{ review_count }} review{{ review_count|pluralize }})</span>
+          </div>
+          {% endif %}
         </div>
 
         <!-- Chat entry point -->
@@ -90,8 +100,59 @@
       {% endfor %}
     </div>
 
+    <!-- Reviews -->
+    <div class="mt-10 grid grid-cols-1 lg:grid-cols-3 gap-6">
+      <div class="lg:col-span-2 bg-white rounded-2xl shadow-lg border border-gray-200 p-6">
+        <h2 class="text-xl font-bold text-gray-900 mb-4">Customer reviews</h2>
+        <div class="space-y-4">
+          {% for r in reviews %}
+          <div class="border border-gray-100 rounded-lg p-4">
+            <div class="flex items-center justify-between mb-1">
+              <div class="font-semibold text-gray-900">{{ r.customer.username }}</div>
+              <div class="text-sm text-amber-500">
+                ★ {{ r.rating }}
+              </div>
+            </div>
+            {% if r.comment %}
+            <p class="text-sm text-gray-700 mt-1">{{ r.comment }}</p>
+            {% endif %}
+            <p class="text-xs text-gray-400 mt-2">{{ r.created_at|date:'M d, Y H:i' }}</p>
+          </div>
+          {% empty %}
+          <p class="text-sm text-gray-500">No reviews yet. Be the first to review this farm.</p>
+          {% endfor %}
+        </div>
+      </div>
+
+      <div class="bg-white rounded-2xl shadow-lg border border-gray-200 p-6">
+        <h2 class="text-lg font-semibold text-gray-900 mb-3">Leave a review</h2>
+        {% if user.is_authenticated and user.is_customer %}
+        <form method="post" action="{% url 'submit_review' slug=farm.slug %}" class="space-y-3">
+          {% csrf_token %}
+          <div>
+            <label class="block text-sm font-medium text-gray-700 mb-1">Rating (1–5)</label>
+            {{ review_form.rating }}
+          </div>
+          <div>
+            <label class="block text-sm font-medium text-gray-700 mb-1">Comment</label>
+            {{ review_form.comment }}
+          </div>
+          <button type="submit" class="w-full bg-gradient-to-r from-green-600 to-green-700 hover:from-green-700 hover:to-green-800 text-white font-semibold py-2.5 rounded-lg shadow-md hover:shadow-lg text-sm">
+            Submit review
+          </button>
+        </form>
+        {% elif not user.is_authenticated %}
+        <p class="text-sm text-gray-600">
+          <a href="/accounts/login/?next={% url 'farm_detail' slug=farm.slug %}" class="font-semibold text-green-700 underline">Login</a>
+          to leave a review.
+        </p>
+        {% else %}
+        <p class="text-sm text-gray-600">Only customer accounts can leave reviews.</p>
+        {% endif %}
+      </div>
+    </div>
+
   </div>
 </div>
 {% endblock %}
-
 
