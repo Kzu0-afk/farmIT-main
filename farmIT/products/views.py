@@ -1,5 +1,6 @@
 from django.contrib.admin.views.decorators import staff_member_required
 from django.contrib.auth.decorators import login_required
+from django.core.paginator import Paginator, EmptyPage, PageNotAnInteger
 from django.db.models import Avg, Count, Prefetch, Q
 from django.db.models.functions import Coalesce
 from django.http import HttpRequest, HttpResponse, HttpResponseForbidden
@@ -34,6 +35,7 @@ def product_list(request: HttpRequest) -> HttpResponse:
     location = request.GET.get('location', '').strip()
     min_price = request.GET.get('min_price', '').strip()
     max_price = request.GET.get('max_price', '').strip()
+    page_number = request.GET.get('page', 1)
 
     products = Product.objects.filter(is_approved=True)
     if query:
@@ -53,6 +55,15 @@ def product_list(request: HttpRequest) -> HttpResponse:
         except ValueError:
             pass
 
+    # Pagination: 12 products per page
+    paginator = Paginator(products, 12)
+    try:
+        products_page = paginator.page(page_number)
+    except PageNotAnInteger:
+        products_page = paginator.page(1)
+    except EmptyPage:
+        products_page = paginator.page(paginator.num_pages)
+
     # Marketplace highlights: top farms by number of approved products.
     # Keep SQL simple for broad DB compatibility.
     highlight_farms = (
@@ -66,14 +77,14 @@ def product_list(request: HttpRequest) -> HttpResponse:
                 queryset=Product.objects.filter(is_approved=True).order_by("-created_at"),
                 to_attr="top_products",
             )
-        )[:6]
+        )[:8]
     )
 
     return render(
         request,
         'products/product_list.html',
         {
-            'products': products,
+            'products': products_page,
             'query': query,
             'location': location,
             'min_price': min_price,
