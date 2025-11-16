@@ -1,0 +1,162 @@
+{% extends 'base.html' %}
+{% block content %}
+<div class="bg-gradient-to-b from-amber-50 to-white min-h-screen py-8 px-4">
+  <div class="max-w-4xl mx-auto space-y-6">
+    <a href="{% url 'product_detail' pk=product.id %}" class="inline-flex items-center text-green-700 hover:text-green-800 text-sm">
+      <svg class="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18" />
+      </svg>
+      Back to product
+    </a>
+
+    <div class="bg-white rounded-2xl shadow-lg border border-gray-200 p-6">
+      <h1 class="text-2xl font-bold text-gray-900 mb-4 flex items-center">
+        <svg class="w-6 h-6 text-amber-600 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
+        </svg>
+        Delivery quote
+      </h1>
+
+      <div class="space-y-4">
+        <div class="border border-gray-100 rounded-lg p-4 flex justify-between items-start">
+          <div>
+            <div class="text-xs uppercase tracking-wide text-gray-500 mb-1">From</div>
+            <div class="font-semibold text-gray-900">{{ farm.name }}</div>
+            <div class="text-sm text-gray-600">{{ farm.location }}</div>
+          </div>
+          <div>
+            <div class="text-xs uppercase tracking-wide text-gray-500 mb-1">To</div>
+            {% if address %}
+            <div class="font-semibold text-gray-900">{{ address.label }}</div>
+            <div class="text-sm text-gray-600">{{ address.full_address }}</div>
+            {% else %}
+            <div class="text-sm text-gray-500">No address selected</div>
+            {% endif %}
+          </div>
+        </div>
+
+        {% if error %}
+        <div class="bg-red-50 border border-red-200 text-red-800 text-sm rounded-lg p-3">
+          {{ error }}
+          {% if not address %}
+          <a href="{% url 'address_list' %}" class="font-semibold underline ml-1">Manage addresses</a>
+          {% endif %}
+        </div>
+        {% endif %}
+
+        {% if distance_km and eta_minutes and quoted_fee %}
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+          <div class="bg-green-50 rounded-lg p-4 text-center">
+            <div class="text-xs uppercase tracking-wide text-gray-500 mb-1">Distance</div>
+            <div class="text-2xl font-bold text-gray-900">{{ distance_km }} km</div>
+          </div>
+          <div class="bg-amber-50 rounded-lg p-4 text-center">
+            <div class="text-xs uppercase tracking-wide text-gray-500 mb-1">Estimated time</div>
+            <div class="text-2xl font-bold text-gray-900">{{ eta_minutes }} min</div>
+          </div>
+          <div class="bg-green-600 rounded-lg p-4 text-center text-white">
+            <div class="text-xs uppercase tracking-wide text-green-100 mb-1">Estimated fee</div>
+            <div class="text-2xl font-bold">₱{{ quoted_fee }}</div>
+          </div>
+        </div>
+
+        <div class="mt-6 flex flex-col md:flex-row md:items-center md:justify-between gap-3">
+          <div class="text-xs text-gray-500">
+            Quote is approximate and may be adjusted after final coordination with the farmer.
+          </div>
+          <div class="flex flex-wrap gap-3">
+            <form method="post" action="{% url 'delivery_create' product.id %}">
+              {% csrf_token %}
+              <input type="hidden" name="address_id" value="{{ address.id }}">
+              <button type="submit" class="bg-gradient-to-r from-green-600 to-green-700 hover:from-green-700 hover:to-green-800 text-white font-semibold px-5 py-2.5 rounded-lg shadow-md hover:shadow-lg text-sm">
+                Confirm delivery request
+              </button>
+            </form>
+            <form method="post" action="{% url 'chat_start_product' product.id %}">
+              {% csrf_token %}
+              <button type="submit" class="bg-white border border-green-600 text-green-700 hover:bg-green-50 font-semibold px-4 py-2.5 rounded-lg shadow-sm text-sm flex items-center space-x-1">
+                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 10h.01M12 10h.01M16 10h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z" />
+                </svg>
+                <span>Chat about delivery</span>
+              </button>
+            </form>
+          </div>
+        </div>
+        {% endif %}
+      </div>
+    </div>
+
+    {% if farm.latitude and farm.longitude and address and address.latitude and address.longitude %}
+    <div class="bg-white rounded-2xl shadow-lg border border-gray-200 p-6">
+      <h2 class="text-lg font-semibold text-gray-900 mb-3">Route preview</h2>
+      <p class="text-sm text-gray-600 mb-3">
+        Map preview uses straight-line distance between farm and your address (no external routing).
+      </p>
+      <div id="delivery-map" class="w-full h-72 rounded-xl overflow-hidden border border-gray-200"></div>
+      <script src="https://api.mapbox.com/mapbox-gl-js/v2.16.1/mapbox-gl.js"></script>
+      <link href="https://api.mapbox.com/mapbox-gl-js/v2.16.1/mapbox-gl.css" rel="stylesheet" />
+      <script>
+        document.addEventListener('DOMContentLoaded', function () {
+          const token = "{{ MAPBOX_PUBLIC_TOKEN|default:'' }}";
+          if (!token) {
+            return;
+          }
+          mapboxgl.accessToken = token;
+          const farmCoords = [{{ farm.longitude }}, {{ farm.latitude }}];
+          const addrCoords = [{{ address.longitude }}, {{ address.latitude }}];
+
+          const map = new mapboxgl.Map({
+            container: 'delivery-map',
+            style: 'mapbox://styles/mapbox/streets-v11',
+            center: farmCoords,
+            zoom: 10,
+          });
+
+          map.on('load', function () {
+            new mapboxgl.Marker({ color: '#15803d' }).setLngLat(farmCoords).setPopup(new mapboxgl.Popup().setText('{{ farm.name|escapejs }}')).addTo(map);
+            new mapboxgl.Marker({ color: '#f97316' }).setLngLat(addrCoords).setPopup(new mapboxgl.Popup().setText('{{ address.label|escapejs }}')).addTo(map);
+
+            map.addSource('route', {
+              type: 'geojson',
+              data: {
+                type: 'Feature',
+                geometry: {
+                  type: 'LineString',
+                  coordinates: [farmCoords, addrCoords],
+                },
+              },
+            });
+            map.addLayer({
+              id: 'route-line',
+              type: 'line',
+              source: 'route',
+              layout: {
+                'line-join': 'round',
+                'line-cap': 'round',
+              },
+              paint: {
+                'line-color': '#15803d',
+                'line-width': 4,
+              },
+            });
+
+            const bounds = new mapboxgl.LngLatBounds();
+            bounds.extend(farmCoords);
+            bounds.extend(addrCoords);
+            map.fitBounds(bounds, { padding: 40 });
+          });
+        });
+      </script>
+      {% if not MAPBOX_PUBLIC_TOKEN %}
+      <p class="mt-2 text-xs text-gray-500">
+        Map preview requires a Mapbox public token (set <code>MAPBOX_PUBLIC_TOKEN</code> in environment).
+      </p>
+      {% endif %}
+    </div>
+    {% endif %}
+  </div>
+</div>
+{% endblock %}
+
+
