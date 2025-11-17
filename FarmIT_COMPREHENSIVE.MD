@@ -240,13 +240,13 @@ If validated regionally, FarmIt can evolve into:
 | **Frontend Hosting** | Vercel | Simple deployment for small-medium web apps |
 | **Backend Hosting** | Railway | Free-tier support, smooth Django integration |
 | **Scope** | Small-to-Midscale MVP | Focus on local validation first |
-| **Next Step** | **Testing Phase for Phase 3** | Comprehensive testing of all implemented features before Phase 4 (Cloud Database & Hosting) |
+| **Next Step** | **Phase 3 Test Wrap-up → Phase 4 Kickoff** | Finish the current Testing Phase, then begin Phase 4 (Cloud DB + Hosting) during the next working session |
 
 ---
 
 **Author:** MJ Villahermosa  
 **Date:** November 2025  
-**Last Updated:** November 16, 2025 (Phase 3 Complete)  
+**Last Updated:** November 17, 2025 (Phase 3 Complete + security hardening)  
 **Purpose:** Strategic and technical documentation for *FarmIt* — to guide initial development and align coding agents or contributors.
 
 
@@ -312,6 +312,13 @@ If validated regionally, FarmIt can evolve into:
   - ✅ Rate limiting on conversation creation (20 per minute)
   - ✅ Message sanitization (HTML escaping, max length enforcement)
   - ✅ Role-based access control for all views (product CRUD, address management, delivery requests)
+
+### Recent Infrastructure Updates (Nov 17, 2025)
+- ✅ **Settings Modularization:** Single `settings.py` replaced with `farmIT/settings/base.py`, `dev.py`, and `prod.py` for clear environment separation.
+- ✅ **Production Security Hardening:** Prod profile enforces `SECURE_SSL_REDIRECT`, HSTS (`SECURE_HSTS_SECONDS=31536000`, preload, include subdomains), secure session/CSRF cookies, trusted proxy header, and manifest-compressed static files.
+- ✅ **Procfile Update:** Release and web processes now set `DJANGO_SETTINGS_MODULE=farmIT.settings.prod`, guaranteeing prod-safe defaults during deploys.
+- ✅ **Deploy Checks:** `manage.py check --deploy` passes under prod configuration when a strong `DJANGO_SECRET_KEY` is provided via environment variable.
+- 🔜 **Phase 4 Preparation:** With infrastructure locked down, the next working session will focus on Phase 4 (cloud database + hosting + Supabase integration) right after concluding Phase 3 testing.
 
 ### UI/UX Changes
 - Registration ✅ **COMPLETED & ENHANCED**
