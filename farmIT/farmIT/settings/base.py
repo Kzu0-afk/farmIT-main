@@ -3,6 +3,8 @@ import os
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
+_TEMPLATE_DIRS = [BASE_DIR / 'templates', BASE_DIR.parent / 'templates']
+TEMPLATE_DIRS = [p for p in _TEMPLATE_DIRS if p.exists()]
 
 # Load .env if available (safe in dev; ignored if package not installed)
 try:
@@ -52,7 +54,7 @@ ROOT_URLCONF = 'farmIT.urls'
 TEMPLATES = [
     {
         'BACKEND': 'django.template.backends.django.DjangoTemplates',
-        'DIRS': [BASE_DIR / 'templates'],
+        'DIRS': TEMPLATE_DIRS,
         'APP_DIRS': True,
         'OPTIONS': {
             'context_processors': [
