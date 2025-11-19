@@ -16,10 +16,17 @@ Including another URLconf
 """
 from django.contrib import admin
 from django.urls import include, path
+from django.http import HttpResponse
+
+def empty_favicon(_request):
+    """Return 204 to avoid noisy /favicon.ico 404s when no icon is provided."""
+    return HttpResponse(status=204, content_type='image/x-icon')
 
 urlpatterns = [
     path('admin/', admin.site.urls),
     path('accounts/', include('users.urls')),
     path('chat/', include('chat.urls')),
     path('', include('products.urls')),
+    # Handle favicon explicitly so browsers don't log 404s
+    path('favicon.ico', empty_favicon),
 ]

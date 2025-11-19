@@ -16,7 +16,14 @@ def product_list(request: HttpRequest) -> HttpResponse:
     max_price = request.GET.get('max_price', '').strip()
     page_number = request.GET.get('page', 1)
 
-    products = Product.objects.filter(is_approved=True)
+    # Start from all products, then apply visibility rules
+    products = Product.objects.all()
+    if not request.user.is_authenticated:
+        products = products.filter(is_approved=True)
+    elif not getattr(request.user, "is_staff", False):
+        products = products.filter(Q(is_approved=True) | Q(farmer=request.user))
+    # Staff users see all
+
     if query:
         products = products.filter(
             Q(product_name__icontains=query) | Q(description__icontains=query)
