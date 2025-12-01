@@ -194,9 +194,16 @@ Backend (Django on Railway) ↔ Supabase (Database)
 - **📋 NEXT: Testing Phase** - Comprehensive testing of all Phase 3 features before moving to Phase 4
 
 ### **Phase 4: Cloud Database & Hosting (Shifted) (Weeks 11–12)**
-- [ ] Django backend setup with Supabase PostgreSQL connection
+- [x] Django backend setup with Supabase PostgreSQL connection *(Nov 19, 2025 — env-driven config, SQLite fallback preserved, Supabase Session Pooler required for IPv4-only Windows/Railway clients)*
 - [ ] Product image upload to Supabase storage
 - [ ] Deployment setup (Railway backend, Vercel frontend)
+
+#### Phase 4 progress notes (Nov 19, 2025)
+- **Environment-driven settings:** `farmIT/settings/__init__.py` now reads `DJANGO_ENV` (`dev` default, `prod` for hardened mode) so we can run `python manage.py runserver` locally without touching `DJANGO_SETTINGS_MODULE`.  
+- **.env layout:** `farmIT/.env` holds `DJANGO_ENV`, `DJANGO_SECRET_KEY`, and Supabase credentials (`DATABASE_URL`, `DB_CONN_MAX_AGE`, `DB_SSL_REQUIRE`). Local dev can point to SQLite by omitting `DATABASE_URL`; production simply sets the variable.  
+- **Supabase connectivity:** Windows and Railway networks lacked IPv6, so the direct Supabase host (`db.<hash>.supabase.co`) failed with `getaddrinfo`. Switching the `DATABASE_URL` to the **Session Pooler** endpoint (`aws-*.pooler.supabase.com:6543`) solved the IPv4 compatibility issue and gives automatic connection pooling.  
+- **Procfile + release flow:** Added `Procfile` with `release: python manage.py migrate --noinput` and `web: gunicorn farmIT.wsgi`, so Railway/Vercel deployments will reuse the same env vars.  
+- **Status:** Migrations executed successfully against Supabase; dashboard shows new REST activity. Next focus is wiring Supabase Storage and provisioning Railway/Vercel apps.
 
 ### **Phase 5: Polishing & Launch (Weeks 13–15)**
 - [ ] Responsive UI/UX improvements
@@ -240,13 +247,13 @@ If validated regionally, FarmIt can evolve into:
 | **Frontend Hosting** | Vercel | Simple deployment for small-medium web apps |
 | **Backend Hosting** | Railway | Free-tier support, smooth Django integration |
 | **Scope** | Small-to-Midscale MVP | Focus on local validation first |
-| **Next Step** | **Phase 3 Test Wrap-up → Phase 4 Kickoff** | Finish the current Testing Phase, then begin Phase 4 (Cloud DB + Hosting) during the next working session |
+| **Next Step** | **Phase 4 hosting rollout** | Supabase connection landed; next session connects Railway (backend) + Vercel (frontend) and adds Supabase Storage |
 
 ---
 
 **Author:** MJ Villahermosa  
 **Date:** November 2025  
-**Last Updated:** November 17, 2025 (Phase 3 Complete + security hardening)  
+**Last Updated:** November 19, 2025 (Supabase connection + env switcher)  
 **Purpose:** Strategic and technical documentation for *FarmIt* — to guide initial development and align coding agents or contributors.
 
 
