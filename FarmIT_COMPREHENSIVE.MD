@@ -411,9 +411,9 @@ If validated regionally, FarmIt can evolve into:
 - ✅ Review/Rating system: farm reviews by customers with star ratings and comments
 - ✅ Enhanced UI/UX: creative farmer-themed design with gradient backgrounds, carousel animations, pagination
 
-**📋 TESTING PHASE (NEXT):**
-- **Status**: Ready to begin comprehensive testing
-- **Focus Areas**:
+**📋 TESTING PHASE (DEFERRED):**
+- **Status**: Comprehensive Phase 3 testing is planned but intentionally deferred so we can proceed with Phase 4 (Cloud Database & Hosting) setup first.
+- **Planned Focus Areas** (to be executed later):
   - Role-based user flows (Customer vs Farmer)
   - Chat functionality (conversation creation, messaging, permissions)
   - Farm management (creation, editing, product association)
@@ -423,5 +423,4 @@ If validated regionally, FarmIt can evolve into:
   - Security (permissions, rate limiting, CSRF protection)
   - UI/UX responsiveness across devices
   - Edge cases and error handling
-- **Testing Approach**: Manual testing + automated tests for critical paths
-- **Timeline**: Before proceeding to Phase 4 (Cloud Database & Hosting)
+- **Planned Testing Approach**: Manual testing + automated tests for critical paths, to be run after initial Phase 4 infrastructure work is in place.
