@@ -4,6 +4,14 @@ from .models import Address, Farm, Product, Review
 
 
 class ProductForm(forms.ModelForm):
+    # Optional file upload that will be stored in Supabase Storage.
+    # When provided, it will override any manual photo_url entered.
+    image_file = forms.FileField(
+        required=False,
+        label="Product Image Upload",
+        help_text="Upload a product image to Supabase Storage (optional).",
+    )
+
     class Meta:
         model = Product
         fields = (
@@ -14,6 +22,7 @@ class ProductForm(forms.ModelForm):
             "photo_url",
             "location",
             "mode_of_payment",
+            "image_file",
         )
 
 
