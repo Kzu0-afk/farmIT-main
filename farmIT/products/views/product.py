@@ -1,12 +1,13 @@
 from django.contrib.admin.views.decorators import staff_member_required  # noqa: F401  # kept for parity if needed elsewhere
 from django.contrib.auth.decorators import login_required
-from django.core.paginator import Paginator, EmptyPage, PageNotAnInteger
+from django.core.paginator import EmptyPage, PageNotAnInteger, Paginator
 from django.db.models import Count, Prefetch, Q
 from django.http import HttpRequest, HttpResponse, HttpResponseForbidden
 from django.shortcuts import get_object_or_404, redirect, render
 
 from ..forms import ProductForm
 from ..models import Farm, Product, Transaction
+from ..storage import upload_product_image
 
 
 def product_list(request: HttpRequest) -> HttpResponse:
@@ -98,13 +99,20 @@ def product_create(request: HttpRequest) -> HttpResponse:
         return HttpResponseForbidden("Only farmer accounts can create product listings.")
 
     if request.method == 'POST':
-        form = ProductForm(request.POST)
+        form = ProductForm(request.POST, request.FILES)
         if form.is_valid():
             product = form.save(commit=False)
             product.farmer = request.user
             farm = getattr(request.user, "farm", None)
             if farm:
                 product.farm = farm
+            # If an image file is provided, upload to Supabase Storage and
+            # store the resulting public URL on the product.
+            image_file = form.cleaned_data.get("image_file")
+            if image_file:
+                uploaded_url = upload_product_image(image_file)
+                if uploaded_url:
+                    product.photo_url = uploaded_url
             product.save()
             return redirect('product_detail', pk=product.pk)
     else:
@@ -119,9 +127,15 @@ def product_update(request: HttpRequest, pk: int) -> HttpResponse:
 
     product = get_object_or_404(Product, pk=pk, farmer=request.user)
     if request.method == 'POST':
-        form = ProductForm(request.POST, instance=product)
+        form = ProductForm(request.POST, request.FILES, instance=product)
         if form.is_valid():
-            form.save()
+            product = form.save(commit=False)
+            image_file = form.cleaned_data.get("image_file")
+            if image_file:
+                uploaded_url = upload_product_image(image_file)
+                if uploaded_url:
+                    product.photo_url = uploaded_url
+            product.save()
             return redirect('product_detail', pk=product.pk)
     else:
         form = ProductForm(instance=product)

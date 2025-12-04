@@ -195,7 +195,7 @@ Backend (Django on Railway) ↔ Supabase (Database)
 
 ### **Phase 4: Cloud Database & Hosting (Shifted) (Weeks 11–12)**
 - [x] Django backend setup with Supabase PostgreSQL connection *(Nov 19, 2025 — env-driven config, SQLite fallback preserved, Supabase Session Pooler required for IPv4-only Windows/Railway clients)*
-- [ ] Product image upload to Supabase storage
+- [x] Product image upload to Supabase Storage *(bucket-backed, URL-only in DB)*
 - [ ] Deployment setup (Railway backend, Vercel frontend)
 
 #### Phase 4 progress notes (Nov 19, 2025)
@@ -226,6 +226,44 @@ Backend (Django on Railway) ↔ Supabase (Database)
 - The stack itself was healthy (verified via `curl http://127.0.0.1:8000` returning `200 OK`); the fix was to either:
   - Clear Edge’s HTTPS-only / HSTS state for `127.0.0.1` and force HTTP, **or**
   - Use a different browser (e.g., Brave) that respects plain `http://127.0.0.1:8000` during local development.
+
+##### Supabase Storage for product images (Phase 4)
+- **Storage model:** the `Product.photo_url` field stores a **public URL only**; the actual binary file is uploaded to a Supabase Storage bucket.
+- **Bucket:** `product-images` *(public bucket)*.
+- **Upload flow (backend):**
+  - Django form `ProductForm` now exposes an optional `image_file` field (`Product Image Upload`).
+  - On create/update, views call `upload_product_image(image_file)` in `products/storage.py`.
+  - The helper initializes a Supabase client from env (`SUPABASE_URL`, `SUPABASE_ANON_KEY`), uploads bytes to `product-images/products/<uuid>-<filename>`, and stores the returned public URL in `photo_url`.
+- **Env vars required (inner `farmIT/.env`):**
+  - `SUPABASE_URL=https://<project-ref>.supabase.co`
+  - `SUPABASE_ANON_KEY=<anon public key>`
+  - `SUPABASE_STORAGE_BUCKET=product-images`
+- **Row Level Security (RLS) policies on `storage.objects`:**
+  - Public uploads for the `product-images` bucket:
+    \[
+    \texttt{create policy "public uploads for product-images" on storage.objects for insert to anon with check (bucket_id = 'product-images');}
+    \]
+  - Public read access for the same bucket:
+    \[
+    \texttt{create policy "public read for product-images" on storage.objects for select to anon using (bucket_id = 'product-images');}
+    \]
+- **Frontend usage:** templates always read `product.photo_url`; if empty, they render the existing placeholder illustration. The product detail hero image uses Tailwind `object-cover` with responsive heights to maintain the original design while staying visually balanced across screen sizes.
+
+##### Next steps for hosting rollout (Railway + Vercel)
+- **Railway backend app (to be done):**
+  - Create a new Railway project for the Django backend and connect the GitHub repo.
+  - Configure env vars in Railway:
+    - `DJANGO_ENV=prod`
+    - `DJANGO_SECRET_KEY=<strong-production-secret>`
+    - `DATABASE_URL=<Supabase Session Pooler URL>`
+    - `DB_CONN_MAX_AGE`, `DB_SSL_REQUIRE=true`
+    - `DJANGO_ALLOWED_HOSTS=<railway-domain>`
+    - `CSRF_TRUSTED_ORIGINS=https://<railway-domain>,https://<vercel-domain>` *(Vercel URL added once available)*.
+  - Rely on the existing `Procfile` for `release` and `web` processes (`migrate` + `gunicorn farmIT.wsgi`).
+- **Vercel frontend/domain (optional split frontend, future step):**
+  - If the frontend is split out, deploy templates/static frontend to Vercel and point it to the Railway API.
+  - Add the Vercel HTTPS URL to Railway’s `CSRF_TRUSTED_ORIGINS` and, if needed, `DJANGO_ALLOWED_HOSTS`.
+  - Verify CORS/CSRF behaviour between Vercel (frontend) and Railway (backend) before launch.
 
 ### **Phase 5: Polishing & Launch (Weeks 13–15)**
 - [ ] Responsive UI/UX improvements
