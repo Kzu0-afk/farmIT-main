@@ -205,6 +205,28 @@ Backend (Django on Railway) ↔ Supabase (Database)
 - **Procfile + release flow:** Added `Procfile` with `release: python manage.py migrate --noinput` and `web: gunicorn farmIT.wsgi`, so Railway/Vercel deployments will reuse the same env vars.  
 - **Status:** Migrations executed successfully against Supabase; dashboard shows new REST activity. Next focus is wiring Supabase Storage and provisioning Railway/Vercel apps.
 
+##### Phase 4 environment profiles (inner `farmIT/.env`)
+- **Outer `.env` (project root):** remains as a commented template and is **never modified**; all active settings come from the inner `farmIT/.env`.
+- **Local dev (SQLite, HTTP, Brave/other browser):**
+  - `DJANGO_ENV=dev`
+  - `DJANGO_SECRET_KEY=...strong-random...`
+  - `DJANGO_ALLOWED_HOSTS=127.0.0.1,localhost`
+  - `CSRF_TRUSTED_ORIGINS=http://127.0.0.1:8000,http://localhost:8000`
+  - `DATABASE_URL=` *(empty → use SQLite fallback)*
+  - `DB_CONN_MAX_AGE=600`, `DB_SSL_REQUIRE=true`
+- **Local dev using Supabase DB (still dev profile):**
+  - Same as above, but set `DATABASE_URL` to the Supabase **Session Pooler** URL.
+  - Keep `DJANGO_ENV=dev` so the server stays on HTTP for easy local testing.
+- **Production (Railway/Vercel):**
+  - Environment variables configured in the host (not from `.env` files).
+  - `DJANGO_ENV=prod`, strong `DJANGO_SECRET_KEY`, `DATABASE_URL` pointing to Supabase pooler, HTTPS origins in `CSRF_TRUSTED_ORIGINS`.
+
+##### Dev HTTPS gotcha (Edge vs local HTTP)
+- During Phase 3 wrap-up, Microsoft Edge cached an HTTPS rule for `127.0.0.1:8000`, which caused repeated `400` errors and “connection is not secure” messages when talking to the Django dev server (which only serves HTTP).
+- The stack itself was healthy (verified via `curl http://127.0.0.1:8000` returning `200 OK`); the fix was to either:
+  - Clear Edge’s HTTPS-only / HSTS state for `127.0.0.1` and force HTTP, **or**
+  - Use a different browser (e.g., Brave) that respects plain `http://127.0.0.1:8000` during local development.
+
 ### **Phase 5: Polishing & Launch (Weeks 13–15)**
 - [ ] Responsive UI/UX improvements
 - [ ] Performance optimization
