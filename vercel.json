@@ -7,7 +7,14 @@
       "config": {
         "runtime": "python3.12",
         "maxLambdaSize": "50mb",
-        "includeFiles": ["farmIT/**", "templates/**", "static/**"]
+        "includeFiles": [
+          "farmIT/**",
+          "templates/**",
+          "static/**",
+          "manage.py",
+          "Procfile",
+          "requirements.txt"
+        ]
       }
     }
   ],
