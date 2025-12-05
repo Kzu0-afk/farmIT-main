@@ -196,6 +196,9 @@ Backend (Django on Railway) ↔ Supabase (Database)
 ### **Phase 4: Cloud Database & Hosting (Shifted) (Weeks 11–12)**
 - [x] Django backend setup with Supabase PostgreSQL connection *(Nov 19, 2025 — env-driven config, SQLite fallback preserved, Supabase Session Pooler required for IPv4-only Windows/Railway clients)*
 - [x] Product image upload to Supabase Storage *(bucket-backed, URL-only in DB)*
+- [x] Vercel frontend deployed (Django on serverless) with host/CSRF hardening (`.vercel.app`, prod domain)
+- [x] Product image form: file uploads now bypass URL validation and surface a clear error on upload failure
+- [x] My Farm page now exposes latitude/longitude fields so delivery quotes can be computed
 - [ ] Deployment setup (Railway backend, Vercel frontend)
 - [ ] Post-deploy debugging: mapping coords capture + chat auto-refresh UX (planned)
 
@@ -273,6 +276,28 @@ Backend (Django on Railway) ↔ Supabase (Database)
 - [ ] Final testing & deployment to production
 - [ ] Fix mapping edge cases (require farm/addresses lat/lng surfaced in UI; graceful errors)
 - [ ] Chat refresh: add polling/auto-update to avoid manual refresh after send/receive
+
+## ✅ Post-Deploy Checks (current status)
+- Core flows verified (manual sanity):
+  - Login/registration (farmer & customer)
+  - Marketplace listing → product detail renders
+  - Product create/edit/delete with image upload (Supabase-backed; errors surfaced if upload fails)
+  - Reviews and delivery quote flows reachable; delivery quote requires farm lat/lng (now editable)
+- Non-functional:
+  - HTTPS/host/CSRF configured for Vercel (`.vercel.app`, prod domain)
+  - Rate limiting still active (middleware unchanged)
+  - Error pages friendly (404/500 templates in place)
+
+## 📌 Next Agenda
+- Debugging & refactoring for Post-Deployment:
+  - Chats: add auto-refresh/polling so new messages appear without manual reload
+  - Mapping: ensure farm/address coordinates capture UX, graceful errors, and quote flow reliability
+
+## Deployment Steps (A–D) Status
+- A) Supabase & database: ✅ completed (DB connectivity + Storage verified)
+- B) Railway backend: ⏳ pending decision (Railway hosting still to be evaluated)
+- C) Vercel frontend: ✅ live on Vercel with host/CSRF hardening
+- D) Post-deploy checks: ✅ passed core flows; follow-up debugging planned (chat refresh, mapping coords)
 
 ---
 
