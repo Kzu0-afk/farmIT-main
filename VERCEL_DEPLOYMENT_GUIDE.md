@@ -153,14 +153,16 @@ DJANGO_LOG_LEVEL=WARNING
 After your first deployment, you'll get a Vercel domain. Update these variables:
 
 1. Go to **Project Settings** → **Environment Variables**
-2. Update `DJANGO_ALLOWED_HOSTS` to include your Vercel domain:
+2. Prefer a wildcard for all Vercel previews and production:
    ```
-   DJANGO_ALLOWED_HOSTS=<your-vercel-domain>.vercel.app
+   DJANGO_ALLOWED_HOSTS=.vercel.app
    ```
-3. Update `CSRF_TRUSTED_ORIGINS`:
+   (Alternatively list each: `farm-it-main.vercel.app,<preview>.vercel.app,...`)
+3. Update `CSRF_TRUSTED_ORIGINS` (no wildcards):
    ```
-   CSRF_TRUSTED_ORIGINS=https://<your-vercel-domain>.vercel.app
+   CSRF_TRUSTED_ORIGINS=https://farm-it-main.vercel.app
    ```
+   Add any custom domains here later (comma-separated).
 
 ### 6.2 Run Migrations
 
@@ -243,6 +245,11 @@ Add build command to `vercel.json`:
 ```
 
 **Note:** Vercel's Python runtime may have limitations with build scripts. If this doesn't work, stick with manual migrations (Option A in Step 6.2).
+
+### 7.3 Host/CSRF sanity checklist
+- `DJANGO_ALLOWED_HOSTS` set to `.vercel.app` (or all known Vercel domains)
+- `CSRF_TRUSTED_ORIGINS` set to your prod domain(s) (no wildcard), e.g.
+  `https://farm-it-main.vercel.app`
 
 ---
 
