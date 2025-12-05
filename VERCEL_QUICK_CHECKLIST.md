@@ -32,8 +32,8 @@ Use this checklist to track your deployment progress.
 - [ ] Got Vercel domain URL
 
 ## Post-Deployment
-- [ ] Updated `DJANGO_ALLOWED_HOSTS` with Vercel domain
-- [ ] Updated `CSRF_TRUSTED_ORIGINS` with Vercel domain
+- [ ] `DJANGO_ALLOWED_HOSTS` set (recommend `.vercel.app`)
+- [ ] `CSRF_TRUSTED_ORIGINS` set (no wildcard; e.g. https://farm-it-main.vercel.app)
 - [ ] Ran migrations (manually or via build script)
 - [ ] Redeployed after env var updates
 
