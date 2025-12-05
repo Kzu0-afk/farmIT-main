@@ -197,6 +197,7 @@ Backend (Django on Railway) ↔ Supabase (Database)
 - [x] Django backend setup with Supabase PostgreSQL connection *(Nov 19, 2025 — env-driven config, SQLite fallback preserved, Supabase Session Pooler required for IPv4-only Windows/Railway clients)*
 - [x] Product image upload to Supabase Storage *(bucket-backed, URL-only in DB)*
 - [ ] Deployment setup (Railway backend, Vercel frontend)
+- [ ] Post-deploy debugging: mapping coords capture + chat auto-refresh UX (planned)
 
 #### Phase 4 progress notes (Nov 19, 2025)
 - **Environment-driven settings:** `farmIT/settings/__init__.py` now reads `DJANGO_ENV` (`dev` default, `prod` for hardened mode) so we can run `python manage.py runserver` locally without touching `DJANGO_SETTINGS_MODULE`.  
@@ -270,6 +271,8 @@ Backend (Django on Railway) ↔ Supabase (Database)
 - [ ] Performance optimization
 - [ ] Security enhancements (CSRF, JWT auth)
 - [ ] Final testing & deployment to production
+- [ ] Fix mapping edge cases (require farm/addresses lat/lng surfaced in UI; graceful errors)
+- [ ] Chat refresh: add polling/auto-update to avoid manual refresh after send/receive
 
 ---
 

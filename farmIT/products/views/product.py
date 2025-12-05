@@ -113,6 +113,13 @@ def product_create(request: HttpRequest) -> HttpResponse:
                 uploaded_url = upload_product_image(image_file)
                 if uploaded_url:
                     product.photo_url = uploaded_url
+                elif not product.photo_url:
+                    # Surface a friendly error instead of silently failing.
+                    form.add_error(
+                        "image_file",
+                        "Image upload failed. Please check Supabase credentials/bucket or paste an Image URL.",
+                    )
+                    return render(request, 'products/product_form.html', {'form': form})
             product.save()
             return redirect('product_detail', pk=product.pk)
     else:
@@ -135,6 +142,12 @@ def product_update(request: HttpRequest, pk: int) -> HttpResponse:
                 uploaded_url = upload_product_image(image_file)
                 if uploaded_url:
                     product.photo_url = uploaded_url
+                elif not product.photo_url:
+                    form.add_error(
+                        "image_file",
+                        "Image upload failed. Please check Supabase credentials/bucket or paste an Image URL.",
+                    )
+                    return render(request, 'products/product_form.html', {'form': form})
             product.save()
             return redirect('product_detail', pk=product.pk)
     else:

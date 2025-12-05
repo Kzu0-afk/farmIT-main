@@ -4,6 +4,12 @@ from .models import Address, Farm, Product, Review
 
 
 class ProductForm(forms.ModelForm):
+    # Optional image URL (kept for backward compatibility / manual URLs)
+    photo_url = forms.URLField(
+        required=False,
+        label="Image URL (optional)",
+        widget=forms.URLInput(attrs={"placeholder": "https://..."}),
+    )
     # Optional file upload that will be stored in Supabase Storage.
     # When provided, it will override any manual photo_url entered.
     image_file = forms.FileField(
@@ -24,6 +30,22 @@ class ProductForm(forms.ModelForm):
             "mode_of_payment",
             "image_file",
         )
+
+    def clean(self):
+        cleaned = super().clean()
+        image_file = cleaned.get("image_file")
+        photo_url = cleaned.get("photo_url")
+
+        # If a file is provided, ignore any photo_url validation noise and let upload overwrite.
+        if image_file:
+            if "photo_url" in self._errors:
+                self._errors.pop("photo_url", None)
+            cleaned["photo_url"] = ""  # will be set to uploaded URL in the view
+        else:
+            # Normalize URL if provided
+            if photo_url:
+                cleaned["photo_url"] = photo_url.strip()
+        return cleaned
 
 
 class FarmForm(forms.ModelForm):
