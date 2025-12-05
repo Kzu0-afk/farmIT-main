@@ -36,3 +36,5 @@ staticfiles/
 
 # IDE/editor\n.vscode/\n.idea/\n*.swp\n.DS_Store\nThumbs.db\n\n*** End Patch ***!
 
+.vercel
+.env*.local
