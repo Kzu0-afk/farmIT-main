@@ -196,11 +196,11 @@ Backend (Django on Railway) ↔ Supabase (Database)
 ### **Phase 4: Cloud Database & Hosting (Shifted) (Weeks 11–12)**
 - [x] Django backend setup with Supabase PostgreSQL connection *(Nov 19, 2025 — env-driven config, SQLite fallback preserved, Supabase Session Pooler required for IPv4-only Windows/Railway clients)*
 - [x] Product image upload to Supabase Storage *(bucket-backed, URL-only in DB)*
-- [x] Vercel frontend deployed (Django on serverless) with host/CSRF hardening (`.vercel.app`, prod domain)
+- [x] Vercel frontend deployed (Django on serverless) with host/CSRF hardening (`.vercel.app`, prod domain) *(Dec 2025 — fully integrated)*
 - [x] Product image form: file uploads now bypass URL validation and surface a clear error on upload failure
 - [x] My Farm page now exposes latitude/longitude fields so delivery quotes can be computed
 - [x] Chat auto-refresh: polling implemented with JSON endpoint, auto-scroll to bottom, debug logs removed *(Dec 2025)*
-- [ ] Deployment setup (Railway backend, Vercel frontend)
+- [ ] Railway backend deployment (postponed — Vercel serverless sufficient for current scale)
 - [ ] Post-deploy debugging: mapping coords capture (chat auto-refresh completed)
 
 #### Phase 4 progress notes (Nov 19, 2025)
@@ -211,6 +211,13 @@ Backend (Django on Railway) ↔ Supabase (Database)
 - **Status:** Migrations executed successfully against Supabase; dashboard shows new REST activity. Next focus is wiring Supabase Storage and provisioning Railway/Vercel apps.
 
 #### Phase 4 progress notes (Dec 2025)
+- **Vercel frontend deployment:** Successfully deployed Django application to Vercel as serverless functions:
+  - Configured `vercel.json` with `@vercel/python` builder, Python 3.12 runtime, and proper file includes
+  - Fixed module resolution by adding `sys.path` manipulation in `wsgi.py` for Vercel's case-sensitive filesystem
+  - Hardened host/CSRF settings: `ALLOWED_HOSTS=.vercel.app` (wildcard) and explicit `CSRF_TRUSTED_ORIGINS` for production domain
+  - All environment variables configured in Vercel dashboard (Django, Supabase, storage)
+  - Migrations run manually via Vercel CLI or Supabase dashboard
+  - **Status:** ✅ Live and fully functional — all core flows verified and working in production
 - **Chat auto-refresh implementation:** Implemented polling-based auto-refresh for chat conversations with the following features:
   - JSON endpoint (`chat_messages_json`) that returns new messages since `last_id` and marks messages as read
   - Client-side polling every 2 seconds with pause/resume on tab visibility changes
@@ -263,21 +270,41 @@ Backend (Django on Railway) ↔ Supabase (Database)
     \]
 - **Frontend usage:** templates always read `product.photo_url`; if empty, they render the existing placeholder illustration. The product detail hero image uses Tailwind `object-cover` with responsive heights to maintain the original design while staying visually balanced across screen sizes.
 
-##### Next steps for hosting rollout (Railway + Vercel)
-- **Railway backend app (to be done):**
-  - Create a new Railway project for the Django backend and connect the GitHub repo.
-  - Configure env vars in Railway:
-    - `DJANGO_ENV=prod`
-    - `DJANGO_SECRET_KEY=<strong-production-secret>`
-    - `DATABASE_URL=<Supabase Session Pooler URL>`
-    - `DB_CONN_MAX_AGE`, `DB_SSL_REQUIRE=true`
-    - `DJANGO_ALLOWED_HOSTS=<railway-domain>`
-    - `CSRF_TRUSTED_ORIGINS=https://<railway-domain>,https://<vercel-domain>` *(Vercel URL added once available)*.
-  - Rely on the existing `Procfile` for `release` and `web` processes (`migrate` + `gunicorn farmIT.wsgi`).
-- **Vercel frontend/domain (optional split frontend, future step):**
-  - If the frontend is split out, deploy templates/static frontend to Vercel and point it to the Railway API.
-  - Add the Vercel HTTPS URL to Railway’s `CSRF_TRUSTED_ORIGINS` and, if needed, `DJANGO_ALLOWED_HOSTS`.
-  - Verify CORS/CSRF behaviour between Vercel (frontend) and Railway (backend) before launch.
+##### Vercel Frontend Deployment (Phase 4) *(Dec 2025)*
+- **Deployment model:** Django application deployed as serverless functions on Vercel using `@vercel/python` builder.
+- **Configuration (`vercel.json`):**
+  - Entry point: `farmIT/farmIT/wsgi.py` exposed as `app = application` for Vercel compatibility
+  - Runtime: Python 3.12 with max Lambda size of 50MB
+  - Included files: `farmIT/**`, `templates/**`, `static/**`, `manage.py`, `Procfile`, `requirements.txt`
+  - Routing: all requests routed to Django WSGI application; static files served from `/static/`
+- **Module resolution fix:** Added `sys.path` manipulation in `wsgi.py` to include project root (`/var/task/farmIT`) and repository root (`/var/task`) for resolving `farmIT.settings` module on Vercel's case-sensitive filesystem.
+- **Environment variables (Vercel dashboard):**
+  - `DJANGO_ENV=prod`
+  - `DJANGO_SECRET_KEY=<strong-production-secret>`
+  - `DATABASE_URL=<Supabase Session Pooler URL>`
+  - `DB_CONN_MAX_AGE=600`, `DB_SSL_REQUIRE=true`
+  - `DJANGO_ALLOWED_HOSTS=.vercel.app` *(wildcard for all preview and production domains)*
+  - `CSRF_TRUSTED_ORIGINS=https://farm-it-main.vercel.app` *(explicit production domain, no wildcards)*
+  - `SUPABASE_URL`, `SUPABASE_ANON_KEY`, `SUPABASE_STORAGE_BUCKET=product-images`
+- **Host/CSRF hardening:**
+  - `ALLOWED_HOSTS` uses `.vercel.app` wildcard to accept all Vercel preview and production domains
+  - `CSRF_TRUSTED_ORIGINS` explicitly lists production domain (wildcards not supported for CSRF)
+  - HTTPS enforced via Vercel's automatic SSL/TLS
+- **Migrations:** Run manually via Vercel CLI (`vercel env pull` + local `python manage.py migrate`) or via Supabase dashboard SQL editor pointing to production database.
+- **Status:** ✅ **Live and functional** — all core flows verified (login, marketplace, product CRUD, chat, reviews, delivery quotes). Post-deploy debugging completed for image uploads, farm coordinates, and chat auto-refresh.
+
+##### Railway Backend Deployment (Postponed)
+- **Status:** ⏳ **Postponed** — Vercel serverless deployment is sufficient for current application scale and traffic.
+- **Rationale:** 
+  - Vercel's serverless functions handle Django application effectively with automatic scaling
+  - No separate backend deployment needed at this stage
+  - Cost-effective for MVP and early production phase
+  - Can be revisited if application requires dedicated backend infrastructure (e.g., WebSocket support, long-running tasks)
+- **Future consideration (if needed):**
+  - Create Railway project for Django backend if dedicated server infrastructure becomes necessary
+  - Configure env vars similar to Vercel setup
+  - Use existing `Procfile` for `release` (migrations) and `web` (gunicorn) processes
+  - Update `CSRF_TRUSTED_ORIGINS` to include Railway domain if frontend/backend split is implemented
 
 ### **Phase 5: Polishing & Launch (Weeks 13–15)**
 - [ ] Responsive UI/UX improvements
@@ -305,10 +332,10 @@ Backend (Django on Railway) ↔ Supabase (Database)
   - Mapping: ensure farm/address coordinates capture UX, graceful errors, and quote flow reliability
 
 ## Deployment Steps (A–D) Status
-- A) Supabase & database: ✅ completed (DB connectivity + Storage verified)
-- B) Railway backend: ⏳ pending decision (Railway hosting still to be evaluated)
-- C) Vercel frontend: ✅ live on Vercel with host/CSRF hardening
-- D) Post-deploy checks: ✅ passed core flows; chat auto-refresh completed; mapping coords debugging planned
+- A) Supabase & database: ✅ **completed** (DB connectivity + Storage verified, Session Pooler configured)
+- B) Railway backend: ⏳ **postponed** (Vercel serverless sufficient for current scale; can be revisited if needed)
+- C) Vercel frontend: ✅ **completed** (Django on serverless, host/CSRF hardened, all core flows verified)
+- D) Post-deploy checks: ✅ **completed** (core flows verified, chat auto-refresh implemented, image uploads fixed, farm coordinates exposed; mapping coords debugging planned)
 
 ---
 
