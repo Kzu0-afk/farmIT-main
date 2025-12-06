@@ -1,7 +1,7 @@
 from django.contrib.admin.views.decorators import staff_member_required  # noqa: F401  # kept for parity if needed elsewhere
 from django.contrib.auth.decorators import login_required
 from django.core.paginator import EmptyPage, PageNotAnInteger, Paginator
-from django.db.models import Count, Prefetch, Q
+from django.db.models import Avg, Count, Prefetch, Q
 from django.http import HttpRequest, HttpResponse, HttpResponseForbidden
 from django.shortcuts import get_object_or_404, redirect, render
 
@@ -53,7 +53,11 @@ def product_list(request: HttpRequest) -> HttpResponse:
     highlight_farms = (
         Farm.objects.filter(products__is_approved=True)
         .exclude(slug="")
-        .annotate(active_products=Count("products", distinct=True))
+        .annotate(
+            active_products=Count("products", distinct=True),
+            review_count=Count("reviews", distinct=True),
+            avg_rating=Avg("reviews__rating"),
+        )
         .order_by("-active_products", "name")
         .prefetch_related(
             Prefetch(
