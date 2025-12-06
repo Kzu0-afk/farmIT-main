@@ -55,9 +55,9 @@
     <div class="bg-white rounded-2xl shadow-xl border border-gray-200 flex flex-col h-[65vh]">
       
       <!-- Messages Area -->
-      <div class="flex-1 overflow-y-auto px-6 py-6 space-y-4 bg-gradient-to-b from-gray-50 to-white">
+      <div id="messages-container" class="flex-1 overflow-y-auto px-6 py-6 space-y-4 bg-gradient-to-b from-gray-50 to-white">
         {% for m in messages %}
-        <div class="flex {% if m.sender_id == user.id %}justify-end{% else %}justify-start{% endif %} animate-fade-in">
+        <div class="message-item flex {% if m.sender_id == user.id %}justify-end{% else %}justify-start{% endif %} animate-fade-in" data-message-id="{{ m.id }}">
           <div class="max-w-xs md:max-w-lg">
             <div class="{% if m.sender_id == user.id %}bg-gradient-to-br from-green-600 to-green-700 text-white rounded-2xl rounded-br-md{% else %}bg-white text-gray-900 rounded-2xl rounded-bl-md shadow-md border border-gray-200{% endif %} px-4 py-3">
               <p class="whitespace-pre-line break-words text-sm leading-relaxed">{{ m.body }}</p>
@@ -71,7 +71,7 @@
           </div>
         </div>
         {% empty %}
-        <div class="flex flex-col items-center justify-center h-full text-center py-12">
+        <div id="empty-state" class="flex flex-col items-center justify-center h-full text-center py-12">
           <div class="w-16 h-16 bg-gray-100 rounded-full flex items-center justify-center mb-4">
             <svg class="w-8 h-8 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z" />
@@ -124,6 +124,178 @@
     animation: fade-in 0.3s ease-out;
   }
 </style>
+
+<script>
+(function() {
+  const conversationId = {{ conversation.id }};
+  const userId = {{ user.id }};
+  let lastMessageId = {% if messages %}{{ messages.last.id|default:0 }}{% else %}0{% endif %};
+  let pollInterval = null;
+  let isPolling = false;
+
+  function getLastMessageId() {
+    const messages = document.querySelectorAll('.message-item[data-message-id]');
+    if (messages.length === 0) return 0;
+    const ids = Array.from(messages).map(m => parseInt(m.getAttribute('data-message-id')));
+    return Math.max(...ids, 0);
+  }
+
+  function addMessage(msg) {
+    const container = document.getElementById('messages-container');
+    const emptyState = document.getElementById('empty-state');
+    
+    if (emptyState) {
+      emptyState.remove();
+    }
+
+    const isOwn = msg.is_own;
+    const messageDiv = document.createElement('div');
+    messageDiv.className = `message-item flex ${isOwn ? 'justify-end' : 'justify-start'} animate-fade-in`;
+    messageDiv.setAttribute('data-message-id', msg.id);
+    
+    messageDiv.innerHTML = `
+      <div class="max-w-xs md:max-w-lg">
+        <div class="${isOwn ? 'bg-gradient-to-br from-green-600 to-green-700 text-white rounded-2xl rounded-br-md' : 'bg-white text-gray-900 rounded-2xl rounded-bl-md shadow-md border border-gray-200'} px-4 py-3">
+          <p class="whitespace-pre-line break-words text-sm leading-relaxed">${escapeHtml(msg.body)}</p>
+          <div class="mt-2 text-[10px] ${isOwn ? 'text-green-100' : 'text-gray-500'} flex items-center ${isOwn ? 'justify-end' : 'justify-start'}">
+            <svg class="w-3 h-3 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
+            </svg>
+            ${msg.created_at}
+          </div>
+        </div>
+      </div>
+    `;
+    
+    container.appendChild(messageDiv);
+    
+    // Auto-scroll to bottom
+    container.scrollTop = container.scrollHeight;
+    
+    lastMessageId = Math.max(lastMessageId, msg.id);
+  }
+
+  function escapeHtml(text) {
+    const div = document.createElement('div');
+    div.textContent = text;
+    return div.innerHTML;
+  }
+
+  function fetchNewMessages() {
+    if (isPolling) return;
+    isPolling = true;
+
+    const url = `{% url 'chat_messages_json' pk=conversation.id %}?last_id=${lastMessageId}`;
+    
+    fetch(url, {
+      method: 'GET',
+      headers: {
+        'X-Requested-With': 'XMLHttpRequest',
+      },
+      credentials: 'same-origin'
+    })
+    .then(response => {
+      if (!response.ok) throw new Error('Network response was not ok');
+      return response.json();
+    })
+    .then(data => {
+      if (data.messages && data.messages.length > 0) {
+        data.messages.forEach(msg => {
+          // Check if message already exists
+          const existing = document.querySelector(`.message-item[data-message-id="${msg.id}"]`);
+          if (!existing) {
+            addMessage(msg);
+          }
+        });
+        // Ensure scroll to bottom after adding all messages
+        setTimeout(() => {
+          const container = document.getElementById('messages-container');
+          if (container) {
+            container.scrollTop = container.scrollHeight;
+          }
+        }, 50);
+      }
+    })
+    .catch(error => {
+      // Only log actual errors (network failures, server errors)
+      if (error && (error.message || error.name)) {
+        // Check if it's a real error, not just a normal network response
+        if (error.message && !error.message.includes('ok') && error.message !== 'Network response was not ok') {
+          console.error('Chat error:', error);
+        }
+      }
+    })
+    .finally(() => {
+      isPolling = false;
+    });
+  }
+
+  // Start polling every 2 seconds
+  function startPolling() {
+    if (pollInterval) return;
+    pollInterval = setInterval(fetchNewMessages, 2000);
+  }
+
+  // Stop polling when page is hidden
+  function stopPolling() {
+    if (pollInterval) {
+      clearInterval(pollInterval);
+      pollInterval = null;
+    }
+  }
+
+  // Auto-scroll to bottom on page load
+  function scrollToBottom() {
+    const container = document.getElementById('messages-container');
+    if (container) {
+      container.scrollTop = container.scrollHeight;
+    }
+  }
+
+  // Scroll to bottom when page loads (especially after redirect from sending message)
+  // Use multiple timeouts to ensure it works even if content loads slowly
+  function initScrollToBottom() {
+    scrollToBottom();
+    setTimeout(scrollToBottom, 50);
+    setTimeout(scrollToBottom, 150);
+    setTimeout(scrollToBottom, 300);
+    setTimeout(scrollToBottom, 500);
+  }
+
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', initScrollToBottom);
+  } else {
+    initScrollToBottom();
+  }
+
+  // Start polling when page loads
+  startPolling();
+
+  // Pause polling when tab is hidden, resume when visible
+  document.addEventListener('visibilitychange', function() {
+    if (document.hidden) {
+      stopPolling();
+    } else {
+      startPolling();
+      fetchNewMessages(); // Fetch immediately when tab becomes visible
+      scrollToBottom(); // Scroll to bottom when tab becomes visible
+    }
+  });
+
+  // Refresh lastMessageId after form submission (when new message is sent)
+  const form = document.querySelector('form[method="post"]');
+  if (form) {
+    form.addEventListener('submit', function() {
+      // Update lastMessageId after a short delay to account for the redirect
+      setTimeout(() => {
+        lastMessageId = getLastMessageId();
+        scrollToBottom(); // Scroll to bottom after redirect
+      }, 1000);
+    });
+  }
+
+})();
+</script>
 {% endblock %}
 
 

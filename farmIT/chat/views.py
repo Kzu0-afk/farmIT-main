@@ -2,7 +2,7 @@ from datetime import timedelta
 
 from django.contrib.auth.decorators import login_required
 from django.db.models import Q
-from django.http import HttpRequest, HttpResponse, HttpResponseForbidden
+from django.http import HttpRequest, HttpResponse, HttpResponseForbidden, JsonResponse
 from django.shortcuts import get_object_or_404, redirect, render
 from django.utils import timezone
 
@@ -134,5 +134,41 @@ def start_conversation_farm(request: HttpRequest, slug: str) -> HttpResponse:
         defaults={"last_message_at": timezone.now()},
     )
     return redirect("chat_conversation_detail", pk=conversation.pk)
+
+
+@login_required
+def get_messages_json(request: HttpRequest, pk: int) -> JsonResponse:
+    """JSON endpoint to fetch messages for auto-refresh."""
+    conversation = get_object_or_404(
+        Conversation.objects.filter(
+            Q(farmer=request.user) | Q(customer=request.user)
+        ),
+        pk=pk,
+    )
+
+    # Get last message ID from query param to only fetch new messages
+    last_id = request.GET.get("last_id", 0)
+    try:
+        last_id = int(last_id)
+    except (ValueError, TypeError):
+        last_id = 0
+
+    messages_qs = conversation.messages.filter(id__gt=last_id).select_related("sender").order_by("created_at")
+
+    # Mark new messages from the other party as read
+    messages_qs.filter(is_read=False).exclude(sender=request.user).update(is_read=True)
+
+    messages_data = []
+    for msg in messages_qs:
+        messages_data.append({
+            "id": msg.id,
+            "body": msg.body,
+            "sender_id": msg.sender_id,
+            "sender_username": msg.sender.username,
+            "created_at": msg.created_at.strftime("%b %d, %H:%M"),
+            "is_own": msg.sender_id == request.user.id,
+        })
+
+    return JsonResponse({"messages": messages_data})
 
 

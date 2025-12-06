@@ -72,14 +72,66 @@
 
     <main class="max-w-6xl mx-auto px-4 py-6 relative z-10">
       {% if messages %}
-      <div class="mb-4 space-y-2">
+      <div id="django-messages" class="mb-4 space-y-2">
         {% for message in messages %}
-        <div class="p-3 rounded-lg bg-white/90 backdrop-blur-sm border border-blue-200 text-blue-800 shadow-md">{{ message }}</div>
+          {% with msg_str=message|stringformat:"s" %}
+            {% if "Message<" not in msg_str %}
+            <div class="p-3 rounded-lg bg-white/90 backdrop-blur-sm border border-blue-200 text-blue-800 shadow-md">{{ message }}</div>
+            {% else %}
+            <div class="debug-message-log" style="display: none;">{{ message }}</div>
+            {% endif %}
+          {% endwith %}
         {% endfor %}
       </div>
       {% endif %}
       {% block content %}{% endblock %}
     </main>
+    <script>
+      // Remove any debug logs that slip through (runs after page load)
+      (function() {
+        function removeDebugLogs() {
+          // Find and hide any elements containing "Message<" pattern in the messages section
+          const messagesContainer = document.getElementById('django-messages');
+          if (messagesContainer) {
+            const allDivs = messagesContainer.querySelectorAll('div');
+            allDivs.forEach(function(div) {
+              const text = div.textContent || '';
+              if (text.match(/Message<[^>]+->\s*\d+>/)) {
+                div.style.display = 'none';
+                div.remove();
+              }
+            });
+          }
+          
+          // Also check main content for any stray debug logs
+          const main = document.querySelector('main');
+          if (main) {
+            const allElements = main.querySelectorAll('*');
+            allElements.forEach(function(el) {
+              // Skip legitimate message containers
+              if (el.closest('#messages-container') || el.closest('.message-item') || el.closest('#django-messages')) {
+                return;
+              }
+              const text = el.textContent || '';
+              if (text.match(/Message<[^>]+->\s*\d+>/) && text.length < 150) {
+                el.style.display = 'none';
+              }
+            });
+          }
+        }
+        
+        // Run after DOM loads
+        if (document.readyState === 'loading') {
+          document.addEventListener('DOMContentLoaded', removeDebugLogs);
+        } else {
+          removeDebugLogs();
+        }
+        
+        // Also run after a delay to catch any dynamically added content
+        setTimeout(removeDebugLogs, 100);
+        setTimeout(removeDebugLogs, 500);
+      })();
+    </script>
 
     <footer class="text-center text-sm text-gray-700 py-6 mt-12 relative z-10">
       <div class="bg-white/40 backdrop-blur-sm rounded-full px-6 py-3 inline-block shadow-md border border-white/50">
