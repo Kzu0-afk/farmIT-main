@@ -199,8 +199,9 @@ Backend (Django on Railway) ↔ Supabase (Database)
 - [x] Vercel frontend deployed (Django on serverless) with host/CSRF hardening (`.vercel.app`, prod domain)
 - [x] Product image form: file uploads now bypass URL validation and surface a clear error on upload failure
 - [x] My Farm page now exposes latitude/longitude fields so delivery quotes can be computed
+- [x] Chat auto-refresh: polling implemented with JSON endpoint, auto-scroll to bottom, debug logs removed *(Dec 2025)*
 - [ ] Deployment setup (Railway backend, Vercel frontend)
-- [ ] Post-deploy debugging: mapping coords capture + chat auto-refresh UX (planned)
+- [ ] Post-deploy debugging: mapping coords capture (chat auto-refresh completed)
 
 #### Phase 4 progress notes (Nov 19, 2025)
 - **Environment-driven settings:** `farmIT/settings/__init__.py` now reads `DJANGO_ENV` (`dev` default, `prod` for hardened mode) so we can run `python manage.py runserver` locally without touching `DJANGO_SETTINGS_MODULE`.  
@@ -208,6 +209,15 @@ Backend (Django on Railway) ↔ Supabase (Database)
 - **Supabase connectivity:** Windows and Railway networks lacked IPv6, so the direct Supabase host (`db.<hash>.supabase.co`) failed with `getaddrinfo`. Switching the `DATABASE_URL` to the **Session Pooler** endpoint (`aws-*.pooler.supabase.com:6543`) solved the IPv4 compatibility issue and gives automatic connection pooling.  
 - **Procfile + release flow:** Added `Procfile` with `release: python manage.py migrate --noinput` and `web: gunicorn farmIT.wsgi`, so Railway/Vercel deployments will reuse the same env vars.  
 - **Status:** Migrations executed successfully against Supabase; dashboard shows new REST activity. Next focus is wiring Supabase Storage and provisioning Railway/Vercel apps.
+
+#### Phase 4 progress notes (Dec 2025)
+- **Chat auto-refresh implementation:** Implemented polling-based auto-refresh for chat conversations with the following features:
+  - JSON endpoint (`chat_messages_json`) that returns new messages since `last_id` and marks messages as read
+  - Client-side polling every 2 seconds with pause/resume on tab visibility changes
+  - Auto-scroll to bottom on page load (multiple timeouts to handle slow rendering) and after sending messages
+  - Debug log filtering: Django messages framework now filters out internal `Message<...>` objects from user view
+  - Message persistence: new messages are dynamically added to the chat interface with fade-in animation
+  - **Status:** Chat is fully functional with persistent messages and smooth auto-refresh UX. No manual refresh required.
 
 ##### Phase 4 environment profiles (inner `farmIT/.env`)
 - **Outer `.env` (project root):** remains as a commented template and is **never modified**; all active settings come from the inner `farmIT/.env`.
@@ -275,7 +285,7 @@ Backend (Django on Railway) ↔ Supabase (Database)
 - [ ] Security enhancements (CSRF, JWT auth)
 - [ ] Final testing & deployment to production
 - [ ] Fix mapping edge cases (require farm/addresses lat/lng surfaced in UI; graceful errors)
-- [ ] Chat refresh: add polling/auto-update to avoid manual refresh after send/receive
+- [x] Chat refresh: polling/auto-update implemented with auto-scroll to bottom *(Dec 2025)*
 
 ## ✅ Post-Deploy Checks (current status)
 - Core flows verified (manual sanity):
@@ -283,6 +293,7 @@ Backend (Django on Railway) ↔ Supabase (Database)
   - Marketplace listing → product detail renders
   - Product create/edit/delete with image upload (Supabase-backed; errors surfaced if upload fails)
   - Reviews and delivery quote flows reachable; delivery quote requires farm lat/lng (now editable)
+  - Chat: auto-refresh polling (2s interval), auto-scroll to bottom on page load/send, debug logs filtered out
 - Non-functional:
   - HTTPS/host/CSRF configured for Vercel (`.vercel.app`, prod domain)
   - Rate limiting still active (middleware unchanged)
@@ -290,14 +301,14 @@ Backend (Django on Railway) ↔ Supabase (Database)
 
 ## 📌 Next Agenda
 - Debugging & refactoring for Post-Deployment:
-  - Chats: add auto-refresh/polling so new messages appear without manual reload
+  - ✅ Chats: auto-refresh/polling implemented with auto-scroll and debug log filtering *(completed)*
   - Mapping: ensure farm/address coordinates capture UX, graceful errors, and quote flow reliability
 
 ## Deployment Steps (A–D) Status
 - A) Supabase & database: ✅ completed (DB connectivity + Storage verified)
 - B) Railway backend: ⏳ pending decision (Railway hosting still to be evaluated)
 - C) Vercel frontend: ✅ live on Vercel with host/CSRF hardening
-- D) Post-deploy checks: ✅ passed core flows; follow-up debugging planned (chat refresh, mapping coords)
+- D) Post-deploy checks: ✅ passed core flows; chat auto-refresh completed; mapping coords debugging planned
 
 ---
 
@@ -335,13 +346,13 @@ If validated regionally, FarmIt can evolve into:
 | **Frontend Hosting** | Vercel | Simple deployment for small-medium web apps |
 | **Backend Hosting** | Railway | Free-tier support, smooth Django integration |
 | **Scope** | Small-to-Midscale MVP | Focus on local validation first |
-| **Next Step** | **Phase 4 hosting rollout** | Supabase connection landed; next session connects Railway (backend) + Vercel (frontend) and adds Supabase Storage |
+| **Next Step** | **Phase 4/5 completion** | Vercel frontend live; chat auto-refresh completed; mapping coords debugging + Railway backend evaluation pending |
 
 ---
 
 **Author:** MJ Villahermosa  
 **Date:** November 2025  
-**Last Updated:** November 19, 2025 (Supabase connection + env switcher)  
+**Last Updated:** December 2025 (Chat auto-refresh implementation + Phase 4 progress)  
 **Purpose:** Strategic and technical documentation for *FarmIt* — to guide initial development and align coding agents or contributors.
 
 
