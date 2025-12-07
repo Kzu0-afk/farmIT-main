@@ -18,19 +18,42 @@
       </h1>
 
       <div class="space-y-4">
-        <div class="border border-gray-100 rounded-lg p-4 flex justify-between items-start">
-          <div>
-            <div class="text-xs uppercase tracking-wide text-gray-500 mb-1">From</div>
-            <div class="font-semibold text-gray-900">{{ farm.name }}</div>
-            <div class="text-sm text-gray-600">{{ farm.location }}</div>
+        <div class="bg-gradient-to-r from-green-50 to-amber-50 border border-gray-200 rounded-xl p-5 flex flex-col md:flex-row justify-between items-start gap-4 shadow-sm">
+          <div class="flex-1 bg-white/80 backdrop-blur-sm rounded-lg p-4 border border-green-200">
+            <div class="flex items-center mb-2">
+              <div class="w-2 h-2 rounded-full bg-green-600 mr-2"></div>
+              <div class="text-xs uppercase tracking-wide text-gray-600 font-semibold">From</div>
+            </div>
+            <div class="font-semibold text-gray-900 text-lg mb-1">{{ farm.name }}</div>
+            <div class="text-sm text-gray-600 flex items-center">
+              <svg class="w-4 h-4 mr-1 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"></path>
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"></path>
+              </svg>
+              {{ farm.location }}
+            </div>
           </div>
-          <div>
-            <div class="text-xs uppercase tracking-wide text-gray-500 mb-1">To</div>
+          <div class="flex items-center text-gray-300 mx-2 hidden md:block">
+            <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7l5 5m0 0l-5 5m5-5H6"></path>
+            </svg>
+          </div>
+          <div class="flex-1 bg-white/80 backdrop-blur-sm rounded-lg p-4 border border-orange-200">
+            <div class="flex items-center mb-2">
+              <div class="w-2 h-2 rounded-full bg-orange-600 mr-2"></div>
+              <div class="text-xs uppercase tracking-wide text-gray-600 font-semibold">To</div>
+            </div>
             {% if address %}
-            <div class="font-semibold text-gray-900">{{ address.label }}</div>
-            <div class="text-sm text-gray-600">{{ address.full_address }}</div>
+            <div class="font-semibold text-gray-900 text-lg mb-1">{{ address.label }}</div>
+            <div class="text-sm text-gray-600 flex items-center">
+              <svg class="w-4 h-4 mr-1 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"></path>
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"></path>
+              </svg>
+              {{ address.full_address }}
+            </div>
             {% else %}
-            <div class="text-sm text-gray-500">No address selected</div>
+            <div class="text-sm text-gray-500 italic">No address selected</div>
             {% endif %}
           </div>
         </div>
@@ -46,16 +69,32 @@
 
         {% if distance_km and eta_minutes and quoted_fee %}
         <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
-          <div class="bg-green-50 rounded-lg p-4 text-center">
-            <div class="text-xs uppercase tracking-wide text-gray-500 mb-1">Distance</div>
-            <div class="text-2xl font-bold text-gray-900">{{ distance_km }} km</div>
+          <div class="bg-gradient-to-br from-green-50 to-green-100 rounded-xl p-4 text-center border border-green-200 shadow-sm hover:shadow-md transition-shadow">
+            <div class="flex items-center justify-center mb-2">
+              <svg class="w-5 h-5 text-green-600 mr-1.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"></path>
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"></path>
+              </svg>
+              <span class="text-xs uppercase tracking-wide text-gray-600 font-semibold">Distance</span>
+            </div>
+            <div class="text-2xl font-bold text-green-700">{{ distance_km }} km</div>
           </div>
-          <div class="bg-amber-50 rounded-lg p-4 text-center">
-            <div class="text-xs uppercase tracking-wide text-gray-500 mb-1">Estimated time</div>
-            <div class="text-2xl font-bold text-gray-900">{{ eta_minutes }} min</div>
+          <div class="bg-gradient-to-br from-amber-50 to-orange-50 rounded-xl p-4 text-center border border-amber-200 shadow-sm hover:shadow-md transition-shadow">
+            <div class="flex items-center justify-center mb-2">
+              <svg class="w-5 h-5 text-orange-600 mr-1.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+              </svg>
+              <span class="text-xs uppercase tracking-wide text-gray-600 font-semibold">Estimated Time</span>
+            </div>
+            <div class="text-2xl font-bold text-orange-700">{{ eta_minutes }} min</div>
           </div>
-          <div class="bg-green-600 rounded-lg p-4 text-center text-white">
-            <div class="text-xs uppercase tracking-wide text-green-100 mb-1">Estimated fee</div>
+          <div class="bg-gradient-to-br from-green-600 to-green-700 rounded-xl p-4 text-center text-white shadow-lg hover:shadow-xl transition-shadow">
+            <div class="flex items-center justify-center mb-2">
+              <svg class="w-5 h-5 text-green-100 mr-1.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+              </svg>
+              <span class="text-xs uppercase tracking-wide text-green-100 font-semibold">Estimated Fee</span>
+            </div>
             <div class="text-2xl font-bold">₱{{ quoted_fee }}</div>
           </div>
         </div>
@@ -89,71 +128,294 @@
 
     {% if farm.latitude and farm.longitude and address and address.latitude and address.longitude %}
     <div class="bg-white rounded-2xl shadow-lg border border-gray-200 p-6">
-      <h2 class="text-lg font-semibold text-gray-900 mb-3">Route preview</h2>
-      <p class="text-sm text-gray-600 mb-3">
-        Map preview uses straight-line distance between farm and your address (no external routing).
-      </p>
-      <div id="delivery-map" class="w-full h-72 rounded-xl overflow-hidden border border-gray-200"></div>
-      <script src="https://api.mapbox.com/mapbox-gl-js/v2.16.1/mapbox-gl.js"></script>
-      <link href="https://api.mapbox.com/mapbox-gl-js/v2.16.1/mapbox-gl.css" rel="stylesheet" />
-      <script>
-        document.addEventListener('DOMContentLoaded', function () {
-          const token = "{{ MAPBOX_PUBLIC_TOKEN|default:'' }}";
-          if (!token) {
-            return;
-          }
-          mapboxgl.accessToken = token;
-          const farmCoords = [{{ farm.longitude }}, {{ farm.latitude }}];
-          const addrCoords = [{{ address.longitude }}, {{ address.latitude }}];
+      <div class="flex items-center justify-between mb-4">
+        <div>
+          <h2 class="text-lg font-semibold text-gray-900 mb-1">Route Preview</h2>
+          <p class="text-sm text-gray-600">
+            Straight-line distance preview (road routing coming soon)
+          </p>
+        </div>
+        <button id="zoom-to-route-btn" class="hidden md:flex items-center px-3 py-2 text-sm text-gray-700 bg-gray-50 hover:bg-gray-100 rounded-lg border border-gray-200 transition-colors" title="Zoom to route">
+          <svg class="w-4 h-4 mr-1.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path>
+          </svg>
+          Fit Route
+        </button>
+      </div>
 
-          const map = new mapboxgl.Map({
-            container: 'delivery-map',
-            style: 'mapbox://styles/mapbox/streets-v11',
-            center: farmCoords,
-            zoom: 10,
-          });
+      <!-- Map Container with Loading State -->
+      <div class="relative rounded-xl overflow-hidden border border-gray-200 shadow-sm">
+        <div id="map-loading" class="absolute inset-0 flex items-center justify-center bg-gradient-to-br from-green-50 to-amber-50 z-20 transition-opacity duration-300">
+          <div class="text-center">
+            <div class="animate-spin rounded-full h-10 w-10 border-3 border-green-600 border-t-transparent mx-auto mb-2"></div>
+            <p class="text-gray-600 text-sm font-medium">Loading map...</p>
+          </div>
+        </div>
+        <div id="delivery-map" class="w-full h-72 md:h-96"></div>
+      </div>
 
-          map.on('load', function () {
-            new mapboxgl.Marker({ color: '#15803d' }).setLngLat(farmCoords).setPopup(new mapboxgl.Popup().setText('{{ farm.name|escapejs }}')).addTo(map);
-            new mapboxgl.Marker({ color: '#f97316' }).setLngLat(addrCoords).setPopup(new mapboxgl.Popup().setText('{{ address.label|escapejs }}')).addTo(map);
-
-            map.addSource('route', {
-              type: 'geojson',
-              data: {
-                type: 'Feature',
-                geometry: {
-                  type: 'LineString',
-                  coordinates: [farmCoords, addrCoords],
-                },
-              },
-            });
-            map.addLayer({
-              id: 'route-line',
-              type: 'line',
-              source: 'route',
-              layout: {
-                'line-join': 'round',
-                'line-cap': 'round',
-              },
-              paint: {
-                'line-color': '#15803d',
-                'line-width': 4,
-              },
-            });
-
-            const bounds = new mapboxgl.LngLatBounds();
-            bounds.extend(farmCoords);
-            bounds.extend(addrCoords);
-            map.fitBounds(bounds, { padding: 40 });
-          });
-        });
-      </script>
-      {% if not MAPBOX_PUBLIC_TOKEN %}
-      <p class="mt-2 text-xs text-gray-500">
-        Map preview requires a Mapbox public token (set <code>MAPBOX_PUBLIC_TOKEN</code> in environment).
-      </p>
+      <!-- Route Statistics Panel -->
+      {% if distance_km and eta_minutes %}
+      <div class="mt-4 bg-gradient-to-br from-green-50 to-amber-50 rounded-xl p-4 border border-green-100">
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+          <div class="bg-white/80 backdrop-blur-sm rounded-lg p-3 text-center border border-white/50 shadow-sm">
+            <div class="flex items-center justify-center mb-1">
+              <svg class="w-5 h-5 text-green-600 mr-1.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"></path>
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"></path>
+              </svg>
+              <span class="text-xs uppercase tracking-wide text-gray-600 font-medium">Distance</span>
+            </div>
+            <div class="text-2xl font-bold text-green-700">{{ distance_km }} km</div>
+          </div>
+          <div class="bg-white/80 backdrop-blur-sm rounded-lg p-3 text-center border border-white/50 shadow-sm">
+            <div class="flex items-center justify-center mb-1">
+              <svg class="w-5 h-5 text-orange-600 mr-1.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+              </svg>
+              <span class="text-xs uppercase tracking-wide text-gray-600 font-medium">Est. Time</span>
+            </div>
+            <div class="text-2xl font-bold text-orange-700">{{ eta_minutes }} min</div>
+          </div>
+          <div class="bg-white/80 backdrop-blur-sm rounded-lg p-3 text-center border border-white/50 shadow-sm">
+            <div class="flex items-center justify-center mb-1">
+              <svg class="w-5 h-5 text-blue-600 mr-1.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+              </svg>
+              <span class="text-xs uppercase tracking-wide text-gray-600 font-medium">Delivery Fee</span>
+            </div>
+            <div class="text-2xl font-bold text-blue-700">₱{{ quoted_fee|default:"—" }}</div>
+          </div>
+        </div>
+      </div>
       {% endif %}
+
+      <!-- Info Notice -->
+      <div class="mt-3 flex items-start text-xs text-gray-500 bg-blue-50 border border-blue-100 rounded-lg p-3">
+        <svg class="w-4 h-4 text-blue-600 mt-0.5 mr-2 flex-shrink-0" fill="currentColor" viewBox="0 0 20 20">
+          <path fill-rule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z" clip-rule="evenodd"></path>
+        </svg>
+        <p>Map shows straight-line distance. Actual road distance and delivery time may vary. Final fee will be confirmed with the farmer.</p>
+      </div>
     </div>
+
+    <!-- Leaflet CSS & JS -->
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY=" crossorigin=""/>
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo=" crossorigin=""></script>
+
+    <style>
+      /* Custom Marker Styles */
+      .farm-marker {
+        background: linear-gradient(135deg, #15803d 0%, #16a34a 100%);
+        width: 32px;
+        height: 32px;
+        border-radius: 50%;
+        border: 4px solid white;
+        box-shadow: 0 2px 8px rgba(0,0,0,0.3), 0 0 0 2px rgba(21, 128, 61, 0.2);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        animation: markerPulse 2s infinite;
+      }
+      
+      .farm-marker::before {
+        content: '🌾';
+        font-size: 14px;
+        filter: drop-shadow(0 1px 2px rgba(0,0,0,0.2));
+      }
+
+      .delivery-marker {
+        background: linear-gradient(135deg, #f97316 0%, #fb923c 100%);
+        width: 32px;
+        height: 32px;
+        border-radius: 50%;
+        border: 4px solid white;
+        box-shadow: 0 2px 8px rgba(0,0,0,0.3), 0 0 0 2px rgba(249, 115, 22, 0.2);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+      }
+      
+      .delivery-marker::before {
+        content: '📦';
+        font-size: 14px;
+        filter: drop-shadow(0 1px 2px rgba(0,0,0,0.2));
+      }
+
+      @keyframes markerPulse {
+        0%, 100% { transform: scale(1); }
+        50% { transform: scale(1.1); }
+      }
+
+      /* Leaflet Popup Customization */
+      .leaflet-popup-content-wrapper {
+        border-radius: 8px;
+        box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+      }
+
+      .leaflet-popup-content {
+        margin: 12px 16px;
+        font-size: 14px;
+        font-weight: 500;
+      }
+
+      /* Map Container */
+      #delivery-map {
+        opacity: 0;
+        transition: opacity 0.5s ease-in;
+      }
+
+      #delivery-map.loaded {
+        opacity: 1;
+      }
+
+      /* Mobile Optimizations */
+      @media (max-width: 768px) {
+        #delivery-map {
+          height: 300px !important;
+        }
+      }
+    </style>
+
+    <script>
+      document.addEventListener('DOMContentLoaded', function () {
+        const farmCoords = [{{ farm.latitude }}, {{ farm.longitude }}];
+        const addrCoords = [{{ address.latitude }}, {{ address.longitude }}];
+        
+        // Calculate center point
+        const centerLat = (farmCoords[0] + addrCoords[0]) / 2;
+        const centerLng = (farmCoords[1] + addrCoords[1]) / 2;
+
+        // Initialize map
+        const map = L.map('delivery-map', {
+          zoomControl: true,
+          attributionControl: true
+        }).setView([centerLat, centerLng], 11);
+
+        // Add OpenStreetMap tiles
+        L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+          attribution: '© <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors',
+          maxZoom: 19
+        }).addTo(map);
+
+        // Create custom markers
+        const farmIcon = L.divIcon({
+          className: 'custom-farm-marker',
+          html: '<div class="farm-marker"></div>',
+          iconSize: [32, 32],
+          iconAnchor: [16, 16],
+          popupAnchor: [0, -16]
+        });
+
+        const deliveryIcon = L.divIcon({
+          className: 'custom-delivery-marker',
+          html: '<div class="delivery-marker"></div>',
+          iconSize: [32, 32],
+          iconAnchor: [16, 16],
+          popupAnchor: [0, -16]
+        });
+
+        // Add markers with popups
+        const farmMarker = L.marker(farmCoords, { icon: farmIcon })
+          .addTo(map)
+          .bindPopup(`
+            <div class="font-semibold text-green-700 mb-1">🌾 {{ farm.name|escapejs }}</div>
+            <div class="text-xs text-gray-600">{{ farm.location|escapejs }}</div>
+          `, { className: 'farm-popup' });
+
+        const addrMarker = L.marker(addrCoords, { icon: deliveryIcon })
+          .addTo(map)
+          .bindPopup(`
+            <div class="font-semibold text-orange-700 mb-1">📦 {{ address.label|escapejs }}</div>
+            <div class="text-xs text-gray-600">{{ address.full_address|escapejs }}</div>
+          `, { className: 'delivery-popup' });
+
+        // Add straight-line route (dashed to indicate it's not actual road route)
+        const straightLine = L.polyline([farmCoords, addrCoords], {
+          color: '#15803d',
+          weight: 3,
+          opacity: 0.6,
+          dashArray: '10, 10',
+          lineCap: 'round',
+          lineJoin: 'round'
+        }).addTo(map);
+
+        // Animate route drawing
+        let routeDrawn = false;
+        function animateRoute() {
+          if (routeDrawn) return;
+          routeDrawn = true;
+          
+          const points = [farmCoords];
+          const animatedLine = L.polyline([], {
+            color: '#15803d',
+            weight: 4,
+            opacity: 0.8,
+            lineCap: 'round',
+            lineJoin: 'round'
+          }).addTo(map);
+
+          let index = 0;
+          const totalPoints = 20;
+          const interval = setInterval(() => {
+            if (index <= totalPoints) {
+              const ratio = index / totalPoints;
+              const lat = farmCoords[0] + (addrCoords[0] - farmCoords[0]) * ratio;
+              const lng = farmCoords[1] + (addrCoords[1] - farmCoords[1]) * ratio;
+              animatedLine.addLatLng([lat, lng]);
+              index++;
+            } else {
+              clearInterval(interval);
+              // Remove animated line and show final dashed line
+              map.removeLayer(animatedLine);
+            }
+          }, 50);
+        }
+
+        // Fit bounds to show both markers
+        const group = new L.featureGroup([farmMarker, addrMarker, straightLine]);
+        map.fitBounds(group.getBounds().pad(0.2), {
+          padding: [40, 40],
+          maxZoom: 13
+        });
+
+        // Zoom to route button handler
+        const zoomBtn = document.getElementById('zoom-to-route-btn');
+        if (zoomBtn) {
+          zoomBtn.addEventListener('click', function() {
+            map.fitBounds(group.getBounds().pad(0.2), {
+              padding: [40, 40],
+              maxZoom: 13,
+              animate: true
+            });
+          });
+        }
+
+        // Hide loading and show map
+        setTimeout(() => {
+          const loadingEl = document.getElementById('map-loading');
+          const mapEl = document.getElementById('delivery-map');
+          
+          if (loadingEl) {
+            loadingEl.style.opacity = '0';
+            setTimeout(() => {
+              loadingEl.style.display = 'none';
+              mapEl.classList.add('loaded');
+              animateRoute();
+            }, 300);
+          }
+        }, 800);
+
+        // Open popups on load
+        setTimeout(() => {
+          farmMarker.openPopup();
+          setTimeout(() => {
+            farmMarker.closePopup();
+            addrMarker.openPopup();
+          }, 2000);
+        }, 1200);
+      });
+    </script>
     {% endif %}
   </div>
 </div>
