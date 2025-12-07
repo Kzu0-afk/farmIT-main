@@ -321,6 +321,315 @@ def delivery_quote(...):
 
 ---
 
+## 🎨 UI Improvements & Optimization
+
+### Visual Enhancements
+
+#### 1. **Enhanced Map Styling**
+- **Custom Marker Icons**: Use branded icons for farm (🌾) and delivery address (📦)
+- **Route Visualization**: 
+  - Animated route drawing effect on load
+  - Color-coded route segments (green for efficient, yellow for moderate, red for long routes)
+  - Gradient polyline for better visual appeal
+- **Map Theme**: Match FarmIT's green/amber color scheme
+- **Shadow Effects**: Add subtle shadows to markers for depth
+
+```html
+<!-- Enhanced marker styling -->
+<style>
+  .farm-marker {
+    background: linear-gradient(135deg, #15803d 0%, #16a34a 100%);
+    border: 3px solid white;
+    box-shadow: 0 4px 8px rgba(0,0,0,0.3), 0 0 0 2px rgba(21, 128, 61, 0.2);
+    animation: pulse 2s infinite;
+  }
+  
+  .delivery-marker {
+    background: linear-gradient(135deg, #f97316 0%, #fb923c 100%);
+    border: 3px solid white;
+    box-shadow: 0 4px 8px rgba(0,0,0,0.3), 0 0 0 2px rgba(249, 115, 22, 0.2);
+  }
+  
+  @keyframes pulse {
+    0%, 100% { transform: scale(1); }
+    50% { transform: scale(1.1); }
+  }
+</style>
+```
+
+#### 2. **Loading States & Skeleton UI**
+- **Map Loading Indicator**: Show spinner or skeleton while route is being fetched
+- **Progressive Loading**: Display map first, then load route asynchronously
+- **Smooth Transitions**: Fade-in animations for route and markers
+
+```html
+<div id="delivery-map" class="relative">
+  <div id="map-loading" class="absolute inset-0 flex items-center justify-center bg-gray-100 rounded-xl z-10">
+    <div class="text-center">
+      <div class="animate-spin rounded-full h-12 w-12 border-b-2 border-green-600 mx-auto mb-2"></div>
+      <p class="text-gray-600 text-sm">Loading route...</p>
+    </div>
+  </div>
+</div>
+```
+
+#### 3. **Interactive Features**
+- **Route Information Panel**: 
+  - Distance in km/miles toggle
+  - Estimated delivery time
+  - Route summary (toll roads, highway usage)
+- **Map Controls**: 
+  - Fullscreen mode
+  - Zoom to route button
+  - Reset view button
+- **Marker Tooltips**: Rich popups with farm/address details
+- **Route Comparison**: Show alternative routes if available
+
+```html
+<!-- Route info panel -->
+<div class="bg-white/95 backdrop-blur-sm rounded-lg p-4 shadow-lg border border-gray-200 mt-4">
+  <div class="flex items-center justify-between mb-2">
+    <h3 class="font-semibold text-gray-900">Route Details</h3>
+    <button id="toggle-route-info" class="text-gray-500 hover:text-gray-700">
+      <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path>
+      </svg>
+    </button>
+  </div>
+  <div id="route-info-content" class="space-y-2">
+    <div class="flex items-center text-sm">
+      <span class="text-gray-600 w-24">Distance:</span>
+      <span class="font-semibold text-green-700" id="route-distance">{{ distance_km }} km</span>
+    </div>
+    <div class="flex items-center text-sm">
+      <span class="text-gray-600 w-24">Duration:</span>
+      <span class="font-semibold text-orange-600" id="route-duration">{{ estimated_time }}</span>
+    </div>
+  </div>
+</div>
+```
+
+#### 4. **Error Handling UI**
+- **Graceful Degradation**: 
+  - Clear message when route API fails
+  - Visual indicator for straight-line fallback
+  - Retry button for failed requests
+- **User-Friendly Messages**: 
+  - "Unable to load route preview" instead of technical errors
+  - Helpful suggestions (check internet connection, try again)
+
+```html
+<div id="route-error" class="hidden bg-amber-50 border border-amber-200 rounded-lg p-4 mt-4">
+  <div class="flex items-start">
+    <svg class="w-5 h-5 text-amber-600 mt-0.5 mr-2" fill="currentColor" viewBox="0 0 20 20">
+      <path fill-rule="evenodd" d="M8.257 3.099c.765-1.36 2.722-1.36 3.486 0l5.58 9.92c.75 1.334-.213 2.98-1.742 2.98H4.42c-1.53 0-2.493-1.646-1.743-2.98l5.58-9.92zM11 13a1 1 0 11-2 0 1 1 0 012 0zm-1-8a1 1 0 00-1 1v3a1 1 0 002 0V6a1 1 0 00-1-1z" clip-rule="evenodd"></path>
+    </svg>
+    <div class="flex-1">
+      <p class="text-sm font-medium text-amber-800">Route preview unavailable</p>
+      <p class="text-sm text-amber-700 mt-1">Using straight-line distance estimate. Delivery fee calculated accurately.</p>
+      <button onclick="retryRoute()" class="mt-2 text-sm text-amber-800 hover:text-amber-900 underline">Try again</button>
+    </div>
+  </div>
+</div>
+```
+
+### Mobile Optimization
+
+#### 1. **Responsive Design**
+- **Touch-Friendly Controls**: Larger tap targets for mobile
+- **Swipe Gestures**: Swipe to dismiss route info panel
+- **Mobile Map Height**: Adjustable height (50vh on mobile, fixed on desktop)
+- **Bottom Sheet**: Route info as bottom sheet on mobile devices
+
+```css
+@media (max-width: 768px) {
+  #delivery-map {
+    height: 50vh;
+    min-height: 300px;
+  }
+  
+  .route-info-panel {
+    position: fixed;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    max-height: 50vh;
+    border-radius: 1rem 1rem 0 0;
+  }
+}
+```
+
+#### 2. **Performance Optimizations**
+- **Lazy Loading**: Load map only when visible
+- **Tile Caching**: Cache map tiles for offline viewing
+- **Debounced Route Requests**: Prevent multiple simultaneous requests
+- **Route Result Caching**: Cache route results in localStorage for same origin/destination
+
+```javascript
+// Route caching example
+function getCachedRoute(origin, destination) {
+  const cacheKey = `route_${origin.lat}_${origin.lng}_${destination.lat}_${destination.lng}`;
+  const cached = localStorage.getItem(cacheKey);
+  if (cached) {
+    const data = JSON.parse(cached);
+    // Cache valid for 1 hour
+    if (Date.now() - data.timestamp < 3600000) {
+      return data.route;
+    }
+  }
+  return null;
+}
+
+function cacheRoute(origin, destination, route) {
+  const cacheKey = `route_${origin.lat}_${origin.lng}_${destination.lat}_${destination.lng}`;
+  localStorage.setItem(cacheKey, JSON.stringify({
+    route: route,
+    timestamp: Date.now()
+  }));
+}
+```
+
+#### 3. **Accessibility Improvements**
+- **Keyboard Navigation**: Full keyboard support for map controls
+- **Screen Reader Support**: ARIA labels for markers and route info
+- **High Contrast Mode**: Alternative color scheme for accessibility
+- **Focus Indicators**: Clear focus states for interactive elements
+
+```html
+<!-- Accessible map controls -->
+<div class="map-controls" role="toolbar" aria-label="Map controls">
+  <button 
+    id="zoom-to-route" 
+    class="map-control-btn"
+    aria-label="Zoom to show entire route"
+    title="Zoom to route">
+    <svg>...</svg>
+  </button>
+  <button 
+    id="fullscreen-toggle"
+    class="map-control-btn"
+    aria-label="Toggle fullscreen mode"
+    title="Fullscreen">
+    <svg>...</svg>
+  </button>
+</div>
+```
+
+### User Experience Enhancements
+
+#### 1. **Route Animation**
+- **Progressive Route Drawing**: Animate route polyline drawing
+- **Marker Entrance**: Fade-in and scale animations for markers
+- **Smooth Zoom**: Animated zoom to route bounds
+
+```javascript
+// Animated route drawing
+function animateRoute(routeLayer, map) {
+  const coordinates = routeLayer.getLatLngs()[0];
+  const polyline = L.polyline([], {
+    color: '#15803d',
+    weight: 4,
+    opacity: 0.8
+  }).addTo(map);
+  
+  let index = 0;
+  const interval = setInterval(() => {
+    if (index < coordinates.length) {
+      polyline.addLatLng(coordinates[index]);
+      index++;
+    } else {
+      clearInterval(interval);
+      // Replace animated polyline with full route
+      map.removeLayer(polyline);
+      routeLayer.addTo(map);
+    }
+  }, 50);
+}
+```
+
+#### 2. **Route Statistics Display**
+- **Visual Metrics**: 
+  - Distance with unit toggle (km/miles)
+  - Estimated delivery time with traffic consideration
+  - Delivery fee breakdown
+- **Route Quality Indicators**: 
+  - Fastest route badge
+  - Shortest route badge
+  - Eco-friendly route option
+
+```html
+<div class="route-stats grid grid-cols-3 gap-4 mt-4">
+  <div class="bg-green-50 rounded-lg p-3 text-center border border-green-200">
+    <div class="text-2xl font-bold text-green-700" id="route-distance">12.5 km</div>
+    <div class="text-xs text-green-600 mt-1">Distance</div>
+  </div>
+  <div class="bg-orange-50 rounded-lg p-3 text-center border border-orange-200">
+    <div class="text-2xl font-bold text-orange-700" id="route-duration">25 min</div>
+    <div class="text-xs text-orange-600 mt-1">Est. Time</div>
+  </div>
+  <div class="bg-blue-50 rounded-lg p-3 text-center border border-blue-200">
+    <div class="text-2xl font-bold text-blue-700" id="delivery-fee">₱150</div>
+    <div class="text-xs text-blue-600 mt-1">Delivery Fee</div>
+  </div>
+</div>
+```
+
+#### 3. **Map Customization Options**
+- **Map Style Toggle**: Switch between standard and satellite view
+- **Layer Controls**: Toggle traffic layer, terrain view
+- **Marker Clustering**: For multiple delivery addresses
+
+```javascript
+// Map style toggle
+const mapStyles = {
+  standard: L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+    attribution: '© OpenStreetMap contributors'
+  }),
+  satellite: L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}', {
+    attribution: '© Esri'
+  })
+};
+
+function toggleMapStyle(style) {
+  map.eachLayer(layer => {
+    if (layer instanceof L.TileLayer) {
+      map.removeLayer(layer);
+    }
+  });
+  mapStyles[style].addTo(map);
+}
+```
+
+### Performance Metrics
+
+#### Optimization Checklist
+- [ ] Map loads in < 2 seconds
+- [ ] Route calculation completes in < 3 seconds
+- [ ] Smooth 60fps animations
+- [ ] Mobile-friendly touch interactions
+- [ ] Offline fallback for cached routes
+- [ ] Lazy loading for map tiles
+- [ ] Debounced API requests
+- [ ] Route result caching (localStorage)
+- [ ] Progressive image loading
+- [ ] Minimized JavaScript bundle size
+
+### Visual Design Consistency
+
+#### Color Scheme Alignment
+- **Primary Green**: `#15803d` (FarmIT brand color) for farm markers and routes
+- **Accent Orange**: `#f97316` (FarmIT accent) for delivery address markers
+- **Background**: Match FarmIT's gradient theme (yellow to green)
+- **Text**: Consistent with FarmIT typography
+
+#### Component Styling
+- **Rounded Corners**: `rounded-xl` (12px) for map container
+- **Shadows**: `shadow-lg` for depth and elevation
+- **Backdrop Blur**: `backdrop-blur-sm` for modern glass effect
+- **Border**: `border border-gray-200` for subtle definition
+
+---
+
 ## 📦 Dependencies
 
 ### Python Packages
@@ -339,6 +648,7 @@ pip install requests  # For API calls (likely already installed)
 
 ## ✅ Testing Checklist
 
+### Core Functionality
 - [ ] OpenRouteService API key configured
 - [ ] Route API endpoint returns GeoJSON
 - [ ] Map displays with Leaflet
@@ -348,9 +658,31 @@ pip install requests  # For API calls (likely already installed)
 - [ ] Fallback to straight line if API fails
 - [ ] Distance calculation uses route distance (not Haversine)
 - [ ] ETA calculation updated based on route
-- [ ] Works on mobile devices
 - [ ] Error handling for missing coordinates
 - [ ] Rate limiting respected (2K requests/day)
+
+### UI/UX Testing
+- [ ] Loading spinner displays while route is fetched
+- [ ] Route animation works smoothly
+- [ ] Markers have proper tooltips/popups
+- [ ] Route info panel displays correctly
+- [ ] Error messages are user-friendly
+- [ ] Mobile responsive design works on all screen sizes
+- [ ] Touch interactions work on mobile devices
+- [ ] Map controls (zoom, fullscreen) function properly
+- [ ] Keyboard navigation works for accessibility
+- [ ] Screen reader announces route information correctly
+- [ ] Route statistics display accurate data
+- [ ] Color scheme matches FarmIT branding
+
+### Performance Testing
+- [ ] Map loads in < 2 seconds
+- [ ] Route calculation completes in < 3 seconds
+- [ ] Smooth animations (60fps)
+- [ ] Route caching works (localStorage)
+- [ ] No memory leaks on repeated route requests
+- [ ] Mobile performance is acceptable (< 3s load time)
+- [ ] Offline fallback works correctly
 
 ---
 
@@ -404,10 +736,15 @@ OPENROUTESERVICE_API_KEY=your_api_key_here
 1. **Get OpenRouteService API key** (5 minutes)
 2. **Implement backend routing utility** (1-2 hours)
 3. **Update frontend with Leaflet** (2-3 hours)
-4. **Test and debug** (1-2 hours)
-5. **Deploy to Vercel** (30 minutes)
+4. **Implement UI improvements** (2-3 hours)
+   - Loading states and animations
+   - Route info panel
+   - Error handling UI
+   - Mobile optimizations
+5. **Test and debug** (1-2 hours)
+6. **Deploy to Vercel** (30 minutes)
 
-**Total Estimated Time:** 5-8 hours
+**Total Estimated Time:** 7-11 hours (including UI improvements)
 
 ---
 
