@@ -1,4 +1,4 @@
-# FarmIT
+# FarmIT (beta version)
 
 FarmIT is a farm-to-market web platform for the Philippines that connects local farmers directly with consumers, restaurants, and small businesses. It focuses on transparent, fair trade by digitizing listings, chat, delivery planning, and reviews.
 
