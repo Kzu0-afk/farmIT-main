@@ -20,6 +20,17 @@ def inbox(request: HttpRequest) -> HttpResponse:
             Q(farmer=request.user) | Q(customer=request.user)
         )
         .select_related("farmer", "customer", "product")
+        .only(
+            "id",
+            "farmer__id",
+            "farmer__username",
+            "customer__id",
+            "customer__username",
+            "product__id",
+            "product__product_name",
+            "last_message_at",
+            "created_at",
+        )
         .order_by("-last_message_at", "-created_at")
     )
 

@@ -47,7 +47,15 @@ def my_farm(request: HttpRequest) -> HttpResponse:
 def farm_detail(request: HttpRequest, slug: str) -> HttpResponse:
     """Public-facing farm page with its approved products and reviews."""
     farm = get_object_or_404(Farm, slug=slug)
-    products = Product.objects.filter(farm=farm, is_approved=True)
+    products = Product.objects.filter(farm=farm, is_approved=True).only(
+        "id",
+        "product_name",
+        "price",
+        "quantity",
+        "location",
+        "photo_url",
+        "created_at",
+    )
 
     reviews_qs = Review.objects.filter(farm=farm).select_related("customer")
     aggregates = reviews_qs.aggregate(
