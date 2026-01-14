@@ -131,4 +131,8 @@ LOGOUT_REDIRECT_URL = '/accounts/login/'
 X_FRAME_OPTIONS = 'DENY'
 SECURE_REFERRER_POLICY = 'same-origin'
 
+# Rate limiting configuration
+# In proxy deployments (Vercel), X-Forwarded-For is the reliable source of client IP.
+RATE_LIMIT_TRUST_X_FORWARDED_FOR = os.getenv("RATE_LIMIT_TRUST_X_FORWARDED_FOR", "true").lower() in ("1", "true", "yes")
+
 

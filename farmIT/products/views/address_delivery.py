@@ -4,6 +4,8 @@ from django.contrib.auth.decorators import login_required
 from django.http import HttpRequest, HttpResponse
 from django.shortcuts import get_object_or_404, redirect, render
 
+from farmIT.throttling import check_throttle
+
 from ..forms import AddressForm
 from ..models import Address, DeliveryRequest, Product, estimate_distance_and_fee
 
@@ -17,6 +19,10 @@ def address_list(request: HttpRequest) -> HttpResponse:
     addresses = Address.objects.filter(user=request.user).order_by("-is_default", "-created_at")
 
     if request.method == "POST":
+        throttle = check_throttle(f"addr:create:{request.user.id}", limit=20, window_seconds=60)
+        if not throttle.allowed:
+            return HttpResponse("Too many requests, please slow down.", status=429)
+
         form = AddressForm(request.POST)
         if form.is_valid():
             address = form.save(commit=False)
@@ -44,6 +50,12 @@ def set_default_address(request: HttpRequest, pk: int) -> HttpResponse:
 
     address = get_object_or_404(Address, pk=pk, user=request.user)
     if request.method == "POST":
+        throttle = check_throttle(f"addr:set_default:{request.user.id}", limit=60, window_seconds=60)
+        if not throttle.allowed:
+            return HttpResponse("Too many requests, please slow down.", status=429)
+
+        # Ensure a single default address per customer.
+        Address.objects.filter(user=request.user, is_default=True).exclude(pk=address.pk).update(is_default=False)
         address.is_default = True
         address.save()
     return redirect("address_list")
@@ -54,6 +66,10 @@ def delivery_quote(request: HttpRequest, product_id: int) -> HttpResponse:
     """Show an estimated delivery quote for a given product and customer address."""
     if not getattr(request.user, "is_customer", False):
         return HttpResponse("Only customer accounts can request delivery quotes.", status=403)
+
+    throttle = check_throttle(f"delivery:quote:{request.user.id}", limit=30, window_seconds=60)
+    if not throttle.allowed:
+        return HttpResponse("Too many requests, please slow down.", status=429)
 
     product = get_object_or_404(Product, pk=product_id, is_approved=True)
     farm = product.farm or getattr(product.farmer, "farm", None)
@@ -103,6 +119,10 @@ def delivery_create(request: HttpRequest, product_id: int) -> HttpResponse:
 
     if not getattr(request.user, "is_customer", False):
         return HttpResponse("Only customer accounts can request deliveries.", status=403)
+
+    throttle = check_throttle(f"delivery:create:{request.user.id}", limit=10, window_seconds=60)
+    if not throttle.allowed:
+        return HttpResponse("Too many requests, please slow down.", status=429)
 
     product = get_object_or_404(Product, pk=product_id, is_approved=True)
     farm = product.farm or getattr(product.farmer, "farm", None)

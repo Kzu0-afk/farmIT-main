@@ -1,5 +1,3 @@
-from datetime import timedelta
-
 from django.contrib.auth.decorators import login_required
 from django.db.models import Q
 from django.http import HttpRequest, HttpResponse, HttpResponseForbidden, JsonResponse
@@ -7,6 +5,8 @@ from django.shortcuts import get_object_or_404, redirect, render
 from django.utils import timezone
 
 from products.models import Product, Farm
+
+from farmIT.throttling import check_throttle
 
 from .forms import MessageForm
 from .models import Conversation, Message
@@ -58,6 +58,11 @@ def conversation_detail(request: HttpRequest, pk: int) -> HttpResponse:
     messages_qs.filter(is_read=False).exclude(sender=request.user).update(is_read=True)
 
     if request.method == "POST":
+        throttle = check_throttle(f"chat:send:{request.user.id}:{conversation.pk}", limit=60, window_seconds=60)
+        if not throttle.allowed:
+            # Avoid leaking operational details; keep response generic.
+            return HttpResponse("Too many messages, please slow down.", status=429)
+
         form = MessageForm(request.POST)
         if form.is_valid():
             body = form.cleaned_data["body"].strip()
@@ -99,12 +104,8 @@ def start_conversation_product(request: HttpRequest, product_id: int) -> HttpRes
         return HttpResponseForbidden("You cannot start a chat with your own listing.")
 
     # Lightweight per-user throttling on conversation creation.
-    window_start = timezone.now() - timedelta(minutes=1)
-    recent_count = Conversation.objects.filter(
-        customer=request.user,
-        created_at__gte=window_start,
-    ).count()
-    if recent_count > 20:
+    throttle = check_throttle(f"chat:start_product:{request.user.id}", limit=20, window_seconds=60)
+    if not throttle.allowed:
         return HttpResponse("Too many new conversations, please slow down.", status=429)
 
     conversation, _created = Conversation.objects.get_or_create(
@@ -130,12 +131,8 @@ def start_conversation_farm(request: HttpRequest, slug: str) -> HttpResponse:
     if farm.farmer_id == request.user.id:
         return HttpResponseForbidden("You cannot start a chat with your own farm.")
 
-    window_start = timezone.now() - timedelta(minutes=1)
-    recent_count = Conversation.objects.filter(
-        customer=request.user,
-        created_at__gte=window_start,
-    ).count()
-    if recent_count > 20:
+    throttle = check_throttle(f"chat:start_farm:{request.user.id}", limit=20, window_seconds=60)
+    if not throttle.allowed:
         return HttpResponse("Too many new conversations, please slow down.", status=429)
 
     conversation, _created = Conversation.objects.get_or_create(
@@ -150,6 +147,10 @@ def start_conversation_farm(request: HttpRequest, slug: str) -> HttpResponse:
 @login_required
 def get_messages_json(request: HttpRequest, pk: int) -> JsonResponse:
     """JSON endpoint to fetch messages for auto-refresh."""
+    throttle = check_throttle(f"chat:poll:{request.user.id}:{pk}", limit=120, window_seconds=60)
+    if not throttle.allowed:
+        return JsonResponse({"error": "Too many requests, slow down."}, status=429)
+
     conversation = get_object_or_404(
         Conversation.objects.filter(
             Q(farmer=request.user) | Q(customer=request.user)

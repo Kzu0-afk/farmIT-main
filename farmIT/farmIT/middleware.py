@@ -3,6 +3,7 @@ from typing import Callable
 
 from django.core.cache import cache
 from django.http import HttpRequest, HttpResponse
+from django.conf import settings
 
 
 class RateLimitMiddleware:
@@ -34,9 +35,23 @@ class RateLimitMiddleware:
 
     @staticmethod
     def _get_client_ip(request: HttpRequest) -> str:
+        """
+        Determine client IP address.
+
+        In reverse-proxy environments (e.g., Vercel), `X-Forwarded-For` is the
+        primary source of client IP. This behavior is configurable via
+        `RATE_LIMIT_TRUST_X_FORWARDED_FOR` to avoid accidental spoofing in
+        non-proxied deployments.
+        """
+        remote = request.META.get('REMOTE_ADDR', 'unknown')
+
+        trust_xff = getattr(settings, "RATE_LIMIT_TRUST_X_FORWARDED_FOR", True)
         forwarded = request.META.get('HTTP_X_FORWARDED_FOR')
-        if forwarded:
-            return forwarded.split(',')[0].strip()
-        return request.META.get('REMOTE_ADDR', 'unknown')
+        if trust_xff and forwarded:
+            # Standard format is "client, proxy1, proxy2"; take the left-most.
+            client_ip = forwarded.split(',')[0].strip()
+            return client_ip or remote
+
+        return remote
 
 
