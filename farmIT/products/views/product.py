@@ -1,6 +1,7 @@
 from django.contrib.admin.views.decorators import staff_member_required  # noqa: F401  # kept for parity if needed elsewhere
 from django.contrib.auth.decorators import login_required
 from django.core.paginator import EmptyPage, PageNotAnInteger, Paginator
+from django.views.decorators.cache import cache_page
 from django.db.models import Avg, Count, Prefetch, Q
 from django.http import HttpRequest, HttpResponse, HttpResponseForbidden
 from django.shortcuts import get_object_or_404, redirect, render
@@ -10,6 +11,7 @@ from ..models import Farm, Product, Transaction
 from ..storage import upload_product_image
 
 
+@cache_page(30)
 def product_list(request: HttpRequest) -> HttpResponse:
     query = request.GET.get('q', '').strip()
     location = request.GET.get('location', '').strip()
@@ -17,8 +19,9 @@ def product_list(request: HttpRequest) -> HttpResponse:
     max_price = request.GET.get('max_price', '').strip()
     page_number = request.GET.get('page', 1)
 
-    # Start from all products, then apply visibility rules
-    products = Product.objects.all()
+    # Start from all products, then apply visibility rules.
+    # Use select_related for foreign keys used in templates to avoid N+1 queries.
+    products = Product.objects.select_related("farmer", "farm")
     if not request.user.is_authenticated:
         products = products.filter(is_approved=True)
     elif not getattr(request.user, "is_staff", False):
@@ -83,7 +86,10 @@ def product_list(request: HttpRequest) -> HttpResponse:
 
 
 def product_detail(request: HttpRequest, pk: int) -> HttpResponse:
-    product = get_object_or_404(Product, pk=pk)
+    product = get_object_or_404(
+        Product.objects.select_related("farmer", "farm"),
+        pk=pk,
+    )
     if not product.is_approved and not (request.user.is_authenticated and (request.user == product.farmer or request.user.is_staff)):
         return HttpResponseForbidden('This product is not available.')
 
