@@ -332,10 +332,32 @@ Backend (Django on Railway) ↔ Supabase (Database)
   - Lightweight caching on marketplace reduces server load for anonymous traffic bursts
 - **Status:** ✅ **Completed** — All major user-facing views optimized for query efficiency without changing functionality or user experience
 
+#### Phase 5 Security Enhancements (Jan 2026)
+- **Per-feature throttling (cache-backed)** *(in addition to global per-IP middleware)*:
+  - Added reusable helper: `farmIT/farmIT/throttling.py` (fixed-window throttling using Django cache)
+  - **Chat hardening (`farmIT/chat/views.py`)**:
+    - Conversation creation throttled: **20/min** per customer (farm + product entry points)
+    - Message sending throttled: **60/min** per user per conversation
+    - Polling endpoint throttled: **120/min** per user per conversation (safe for 2s polling)
+  - **Delivery + Address hardening (`farmIT/products/views/address_delivery.py`)**:
+    - Address creation throttled: **20/min** per customer
+    - Set default address throttled: **60/min** per customer
+    - Delivery quote throttled: **30/min** per customer
+    - Delivery create throttled: **10/min** per customer
+- **Data integrity & access control**:
+  - Enforced **single default address** per customer when setting default (clears previous defaults)
+  - Continued strict ownership checks (`Address.user=request.user`, delivery list filtered by customer or farm owner)
+- **Production browser/session hardening (`farmIT/farmIT/settings/prod.py`)**:
+  - Secure cookie flags and HTTP-only cookies: `SESSION_COOKIE_HTTPONLY`, `CSRF_COOKIE_HTTPONLY`
+  - SameSite defaults: `SESSION_COOKIE_SAMESITE=Lax`, `CSRF_COOKIE_SAMESITE=Lax` (env-overridable)
+  - Security headers: `SECURE_CONTENT_TYPE_NOSNIFF`, `SECURE_CROSS_ORIGIN_OPENER_POLICY`, `SECURE_CROSS_ORIGIN_RESOURCE_POLICY`
+- **Proxy-safe IP rate limiting (`farmIT/farmIT/middleware.py`)**:
+  - Added env-driven `RATE_LIMIT_TRUST_X_FORWARDED_FOR` (default **true**) so Vercel uses correct client IP for per-IP rate limiting
+
 ### **Phase 5: Polishing & Launch (Weeks 13–15)**
 - [ ] Responsive UI/UX improvements
 - [x] Performance optimization ✅ **COMPLETED** *(Jan 2026)*
-- [ ] Security enhancements (CSRF, JWT auth)
+- [x] Security enhancements ✅ **COMPLETED** *(Jan 2026 — throttling + prod hardening)*
 - [ ] Final testing & deployment to production
 - [ ] Fix mapping edge cases (require farm/addresses lat/lng surfaced in UI; graceful errors)
 - [x] Chat refresh: polling/auto-update implemented with auto-scroll to bottom *(Dec 2025)*
@@ -405,7 +427,7 @@ If validated regionally, FarmIt can evolve into:
 
 **Author:** MJ Villahermosa  
 **Date:** November 2025  
-**Last Updated:** January 2026 (Phase 5 performance optimizations completed)  
+**Last Updated:** January 2026 (Phase 5 performance + security hardening completed)  
 **Purpose:** Strategic and technical documentation for *FarmIt* — to guide initial development and align coding agents or contributors.
 
 
