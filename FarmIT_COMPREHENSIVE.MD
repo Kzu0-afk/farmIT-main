@@ -306,9 +306,35 @@ Backend (Django on Railway) ↔ Supabase (Database)
   - Use existing `Procfile` for `release` (migrations) and `web` (gunicorn) processes
   - Update `CSRF_TRUSTED_ORIGINS` to include Railway domain if frontend/backend split is implemented
 
+#### Phase 5 Performance Optimizations (Jan 2026)
+- **Query optimization across key views:**
+  - **Marketplace (`product_list`):**
+    - Added `select_related("farmer", "farm")` to main product queryset to eliminate N+1 queries when rendering product cards
+    - Implemented `@cache_page(30)` decorator for anonymous users to reduce repeated database queries for popular marketplace views
+    - Pagination and filters remain unchanged (12 products per page)
+  - **Product detail (`product_detail`):**
+    - Optimized product fetch with `select_related("farmer", "farm")` to avoid extra queries when accessing seller and farm information
+    - Transaction interests query already optimized with `select_related("buyer")`
+  - **Farm detail (`farm_detail`):**
+    - Products queryset optimized with `.only()` to fetch only fields displayed in the farm products grid (reduces memory and transfer overhead)
+    - Review aggregation already efficient with `select_related("customer")`
+  - **My Farm (`my_farm`):**
+    - Products queryset optimized with `select_related("farm")` to avoid extra queries when displaying farmer's product list
+  - **Chat inbox (`inbox`):**
+    - Conversation queryset optimized with `.only()` to fetch only fields needed for inbox display (IDs, usernames, product name, timestamps)
+    - Already had `select_related("farmer", "customer", "product")` in place
+  - **Delivery quote (`delivery_quote`):**
+    - Product and address queries optimized with `select_related("farm", "user")` to minimize database hits
+- **Impact:**
+  - Reduced database queries from O(n) to O(1) for related object access in list views
+  - Improved page load times, especially for marketplace and farm detail pages
+  - Reduced memory footprint by fetching only necessary fields in list views
+  - Lightweight caching on marketplace reduces server load for anonymous traffic bursts
+- **Status:** ✅ **Completed** — All major user-facing views optimized for query efficiency without changing functionality or user experience
+
 ### **Phase 5: Polishing & Launch (Weeks 13–15)**
 - [ ] Responsive UI/UX improvements
-- [ ] Performance optimization
+- [x] Performance optimization ✅ **COMPLETED** *(Jan 2026)*
 - [ ] Security enhancements (CSRF, JWT auth)
 - [ ] Final testing & deployment to production
 - [ ] Fix mapping edge cases (require farm/addresses lat/lng surfaced in UI; graceful errors)
@@ -379,7 +405,7 @@ If validated regionally, FarmIt can evolve into:
 
 **Author:** MJ Villahermosa  
 **Date:** November 2025  
-**Last Updated:** December 2025 (Chat auto-refresh implementation + Phase 4 progress)  
+**Last Updated:** January 2026 (Phase 5 performance optimizations completed)  
 **Purpose:** Strategic and technical documentation for *FarmIt* — to guide initial development and align coding agents or contributors.
 
 
@@ -490,10 +516,10 @@ If validated regionally, FarmIt can evolve into:
 9) ⏳ Add indexes for filters and highlights; spatial-friendly indexes on `(latitude, longitude)` - **OPTIONAL** (can be added during Phase 4 optimization)
 
 ### Performance & Future Work
-- Add queryset prefetch/select_related in marketplace and farm pages
-- Cache rating aggregates per farm (denormalized fields or cached properties)
-- Upgrade chat to Django Channels (WebSockets) in Phase 4+
-- Cache distance/ETA quotes by `(farm_id, lat, lng)` with short TTL; dedupe calls
+- ✅ Add queryset prefetch/select_related in marketplace and farm pages *(Phase 5 - completed)*
+- Cache rating aggregates per farm (denormalized fields or cached properties) *(optional future enhancement)*
+- Upgrade chat to Django Channels (WebSockets) in Phase 4+ *(future enhancement)*
+- Cache distance/ETA quotes by `(farm_id, lat, lng)` with short TTL; dedupe calls *(optional future enhancement)*
 
 ### Compliance with Rules
 - Infrastructure: aligns to project goals and existing Django stack
