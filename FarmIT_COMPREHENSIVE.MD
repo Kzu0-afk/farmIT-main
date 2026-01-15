@@ -370,8 +370,23 @@ Backend (Django on Railway) ↔ Supabase (Database)
 - **Map rendering safety**:
   - Leaflet map in `delivery_quote.html` only initializes when **both farm and address have valid lat/lng**, preventing JS errors when coordinates are missing.
 
+####Phase 5 UI/UX Responsive Polish (Jan 2026) — *In Progress*
+- **Mobile/tablet layout improvements**:
+  - **Marketplace page (`product_list.html`)** ✅:
+    - Responsive header: title + action button stack on mobile, side-by-side on larger screens
+    - Search form: adapts from 1-column (mobile) to 5-column (desktop) grid with smaller inputs on mobile
+    - Featured farms carousel: responsive height (h-56 mobile → h-72 desktop), smaller navigation controls
+    - Pagination: full-width buttons on mobile, horizontal scroll for page numbers
+    - Enhanced empty state: card background, clearer messaging, "Clear filters" link
+  - **Product detail page (`product_detail.html`)** ✅ *partially*:
+    - Responsive image heights (h-56 mobile → h-96 desktop), back button sizing, grid gaps
+    - Product name scales (text-2xl mobile → text-4xl desktop)
+    - Responsive padding (p-5 mobile → p-8 desktop)
+  - **Remaining** (My Farm, Chat, Delivery Quote pending completion)
+- **Status:** 🔄 **In Progress** — Marketplace and product detail mobile polish completed; other views pending
+
 ### **Phase 5: Polishing & Launch (Weeks 13–15)**
-- [ ] Responsive UI/UX improvements
+- [x] Responsive UI/UX improvements 🔄 **IN PROGRESS** *(Jan 2026 — marketplace & product detail mobile polish completed)*
 - [x] Performance optimization ✅ **COMPLETED** *(Jan 2026)*
 - [x] Security enhancements ✅ **COMPLETED** *(Jan 2026 — throttling + prod hardening)*
 - [ ] Final testing & deployment to production
@@ -443,7 +458,7 @@ If validated regionally, FarmIt can evolve into:
 
 **Author:** MJ Villahermosa  
 **Date:** November 2025  
-**Last Updated:** January 2026 (Phase 5 performance, security hardening, and mapping robustness completed)  
+**Last Updated:** January 2026 (Phase 5 performance, security, mapping robustness completed; UI polish in progress)  
 **Purpose:** Strategic and technical documentation for *FarmIt* — to guide initial development and align coding agents or contributors.
 
 
