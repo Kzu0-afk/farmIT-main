@@ -354,12 +354,28 @@ Backend (Django on Railway) ↔ Supabase (Database)
 - **Proxy-safe IP rate limiting (`farmIT/farmIT/middleware.py`)**:
   - Added env-driven `RATE_LIMIT_TRUST_X_FORWARDED_FOR` (default **true**) so Vercel uses correct client IP for per-IP rate limiting
 
+#### Phase 5 Mapping Robustness (Jan 2026)
+- **Coordinate capture & validation (farms and addresses)**:
+  - Farm latitude/longitude and Address latitude/longitude now validated server-side to **strict ranges**:
+    - Latitude between **-90 and 90**; longitude between **-180 and 180** (via `FarmForm` and `AddressForm`)
+  - UI labels in `my_farm.html` and `address_list.html` already explain decimal-degree format; validation ensures only sensible values are saved.
+- **Graceful handling of missing/invalid coordinates in delivery flow**:
+  - In `delivery_quote`:
+    - If no address is selected: friendly prompt to add/manage addresses (with link to address book)
+    - If the farm has no coordinates: message instructs the customer to ask the farmer to update their farm location
+    - If the address has no coordinates: message instructs the customer to edit the address and add lat/lng in decimal degrees
+    - Any unexpected calculation error surfaces a **generic, non-technical** message (no internal details leaked)
+  - In `delivery_create`:
+    - Explicit checks for missing farm/address coordinates return clear 400 responses describing what needs fixing
+- **Map rendering safety**:
+  - Leaflet map in `delivery_quote.html` only initializes when **both farm and address have valid lat/lng**, preventing JS errors when coordinates are missing.
+
 ### **Phase 5: Polishing & Launch (Weeks 13–15)**
 - [ ] Responsive UI/UX improvements
 - [x] Performance optimization ✅ **COMPLETED** *(Jan 2026)*
 - [x] Security enhancements ✅ **COMPLETED** *(Jan 2026 — throttling + prod hardening)*
 - [ ] Final testing & deployment to production
-- [ ] Fix mapping edge cases (require farm/addresses lat/lng surfaced in UI; graceful errors)
+- [x] Fix mapping edge cases ✅ **COMPLETED** *(Jan 2026 — coord validation + graceful errors)*
 - [x] Chat refresh: polling/auto-update implemented with auto-scroll to bottom *(Dec 2025)*
 
 ## ✅ Post-Deploy Checks (current status)
@@ -427,7 +443,7 @@ If validated regionally, FarmIt can evolve into:
 
 **Author:** MJ Villahermosa  
 **Date:** November 2025  
-**Last Updated:** January 2026 (Phase 5 performance + security hardening completed)  
+**Last Updated:** January 2026 (Phase 5 performance, security hardening, and mapping robustness completed)  
 **Purpose:** Strategic and technical documentation for *FarmIt* — to guide initial development and align coding agents or contributors.
 
 
