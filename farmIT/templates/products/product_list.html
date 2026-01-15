@@ -5,18 +5,18 @@
     
     <!-- Hero Header Section with Farm Theme -->
     <div class="mb-8">
-      <div class="flex items-center justify-between mb-6">
-        <div>
-          <h1 class="text-4xl md:text-5xl font-bold text-gray-900 mb-2 flex items-center">
-            <svg class="w-12 h-12 text-green-700 mr-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+      <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mb-6">
+        <div class="flex-1">
+          <h1 class="text-3xl sm:text-4xl md:text-5xl font-bold text-gray-900 mb-2 flex items-center">
+            <svg class="w-10 h-10 sm:w-12 sm:h-12 text-green-700 mr-3 sm:mr-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 3h2l.4 2M7 13h10l4-8H5.4M7 13L5.4 5M7 13l-2.293 2.293c-.63.63-.184 1.707.707 1.707H17m0 0a2 2 0 100 4 2 2 0 000-4zm-8 2a2 2 0 11-4 0 2 2 0 014 0z" />
             </svg>
-            Farm Marketplace
+            <span>Farm Marketplace</span>
           </h1>
-          <p class="text-lg text-gray-600 ml-16">🌾 Fresh produce directly from local farmers 🌾</p>
+          <p class="text-sm sm:text-base md:text-lg text-gray-600 ml-13 sm:ml-16">🌾 Fresh produce directly from local farmers 🌾</p>
         </div>
         {% if user.is_authenticated and user.is_farmer %}
-        <a href="/products/new/" class="bg-gradient-to-r from-green-600 to-green-700 hover:from-green-700 hover:to-green-800 text-white font-semibold px-6 py-3 rounded-lg shadow-md hover:shadow-xl transform hover:-translate-y-0.5 transition duration-200 flex items-center space-x-2">
+        <a href="/products/new/" class="bg-gradient-to-r from-green-600 to-green-700 hover:from-green-700 hover:to-green-800 text-white font-semibold px-4 sm:px-6 py-2.5 sm:py-3 rounded-lg shadow-md hover:shadow-xl transform hover:-translate-y-0.5 transition duration-200 flex items-center justify-center space-x-2 w-full sm:w-auto">
           <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4" />
           </svg>
@@ -26,15 +26,15 @@
       </div>
 
       <!-- Enhanced Search Section with Decorative Elements -->
-      <div class="bg-white/95 backdrop-blur-sm rounded-2xl shadow-xl p-6 border-t-4 border-green-600 relative overflow-hidden">
+      <div class="bg-white/95 backdrop-blur-sm rounded-2xl shadow-xl p-4 sm:p-6 border-t-4 border-green-600 relative overflow-hidden">
         <!-- Decorative barn pattern -->
-        <div class="absolute top-0 right-0 opacity-5">
+        <div class="absolute top-0 right-0 opacity-5 hidden sm:block">
           <svg class="w-32 h-32 text-green-700" fill="currentColor" viewBox="0 0 24 24">
             <path d="M12 2L2 7v10c0 5 10 6 10 6s10-1 10-6V7L12 2z"/>
           </svg>
         </div>
-        <form method="get" class="grid grid-cols-1 md:grid-cols-5 gap-4 relative z-10">
-          <div class="relative">
+        <form method="get" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-3 sm:gap-4 relative z-10">
+          <div class="relative sm:col-span-2 lg:col-span-1">
             <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
               <svg class="h-5 w-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
@@ -44,7 +44,7 @@
               name="q" 
               placeholder="Search products..." 
               value="{{ query }}" 
-              class="block w-full pl-10 pr-3 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-600 focus:border-transparent transition duration-200 hover:border-green-400" 
+              class="block w-full pl-10 pr-3 py-2.5 sm:py-3 text-sm sm:text-base border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-600 focus:border-transparent transition duration-200 hover:border-green-400" 
             />
           </div>
 
@@ -59,14 +59,14 @@
               name="location" 
               placeholder="Location..." 
               value="{{ location }}" 
-              class="block w-full pl-10 pr-3 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-600 focus:border-transparent transition duration-200 hover:border-green-400" 
+              class="block w-full pl-10 pr-3 py-2.5 sm:py-3 text-sm sm:text-base border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-600 focus:border-transparent transition duration-200 hover:border-green-400" 
             />
           </div>
 
-          <input name="min_price" value="{{ min_price }}" placeholder="Min price" class="border border-gray-300 rounded-lg px-3 py-3 focus:ring-2 focus:ring-green-600 focus:border-transparent transition duration-200 hover:border-green-400" />
-          <input name="max_price" value="{{ max_price }}" placeholder="Max price" class="border border-gray-300 rounded-lg px-3 py-3 focus:ring-2 focus:ring-green-600 focus:border-transparent transition duration-200 hover:border-green-400" />
+          <input name="min_price" value="{{ min_price }}" placeholder="Min price" class="border border-gray-300 rounded-lg px-3 py-2.5 sm:py-3 text-sm sm:text-base focus:ring-2 focus:ring-green-600 focus:border-transparent transition duration-200 hover:border-green-400" />
+          <input name="max_price" value="{{ max_price }}" placeholder="Max price" class="border border-gray-300 rounded-lg px-3 py-2.5 sm:py-3 text-sm sm:text-base focus:ring-2 focus:ring-green-600 focus:border-transparent transition duration-200 hover:border-green-400" />
 
-          <button class="bg-gradient-to-r from-amber-600 to-amber-700 hover:from-amber-700 hover:to-amber-800 text-white font-semibold py-3 px-6 rounded-lg shadow-md hover:shadow-lg transition duration-200 flex items-center justify-center space-x-2">
+          <button class="bg-gradient-to-r from-amber-600 to-amber-700 hover:from-amber-700 hover:to-amber-800 text-white font-semibold py-2.5 sm:py-3 px-6 rounded-lg shadow-md hover:shadow-lg transition duration-200 flex items-center justify-center space-x-2 text-sm sm:text-base">
             <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
             </svg>
@@ -78,24 +78,24 @@
 
     {% if highlight_farms %}
     <!-- Featured Farms Carousel - Horizontal Banner Style -->
-    <div class="mt-10 mb-12">
-      <div class="flex items-center justify-between mb-6">
-        <h2 class="text-3xl font-bold text-gray-900 flex items-center">
-          <svg class="w-8 h-8 text-amber-600 mr-3" fill="currentColor" viewBox="0 0 24 24">
+    <div class="mt-8 sm:mt-10 mb-8 sm:mb-12">
+      <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 sm:gap-0 mb-4 sm:mb-6">
+        <h2 class="text-2xl sm:text-3xl font-bold text-gray-900 flex items-center">
+          <svg class="w-7 h-7 sm:w-8 sm:h-8 text-amber-600 mr-2 sm:mr-3" fill="currentColor" viewBox="0 0 24 24">
             <path d="M11.049 2.927c.3-.921 1.603-.921 1.902 0l1.286 3.967a1 1 0 00.95.69h4.178c.969 0 1.371 1.24.588 1.81l-3.383 2.46a1 1 0 00-.364 1.118l1.287 3.966c.3.922-.755 1.688-1.54 1.118l-3.384-2.46a1 1 0 00-1.175 0l-3.384 2.46c-.784.57-1.838-.196-1.539-1.118l1.287-3.966a1 1 0 00-.364-1.118L2.997 9.394c-.783-.57-.38-1.81.588-1.81h4.178a1 1 0 00.95-.69l1.286-3.967z" />
           </svg>
-          Featured Farms 🌻
+          <span>Featured Farms 🌻</span>
         </h2>
-        <div class="flex items-center space-x-2">
-          <span class="text-sm text-gray-600">{{ highlight_farms|length }} farm{{ highlight_farms|length|pluralize }}</span>
+        <div class="flex items-center justify-between sm:justify-end space-x-3">
+          <span class="text-xs sm:text-sm text-gray-600">{{ highlight_farms|length }} farm{{ highlight_farms|length|pluralize }}</span>
           <div class="flex space-x-2">
-            <button id="prevFarm" class="bg-white hover:bg-gray-50 border border-gray-300 text-gray-700 p-2 rounded-full shadow-md hover:shadow-lg transition duration-200">
-              <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <button id="prevFarm" class="bg-white hover:bg-gray-50 border border-gray-300 text-gray-700 p-1.5 sm:p-2 rounded-full shadow-md hover:shadow-lg transition duration-200" aria-label="Previous farm">
+              <svg class="w-4 h-4 sm:w-5 sm:h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7" />
               </svg>
             </button>
-            <button id="nextFarm" class="bg-white hover:bg-gray-50 border border-gray-300 text-gray-700 p-2 rounded-full shadow-md hover:shadow-lg transition duration-200">
-              <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <button id="nextFarm" class="bg-white hover:bg-gray-50 border border-gray-300 text-gray-700 p-1.5 sm:p-2 rounded-full shadow-md hover:shadow-lg transition duration-200" aria-label="Next farm">
+              <svg class="w-4 h-4 sm:w-5 sm:h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" />
               </svg>
             </button>
@@ -104,7 +104,7 @@
       </div>
 
       <!-- Carousel Container -->
-      <div class="relative overflow-hidden rounded-2xl shadow-2xl" style="height: 280px;">
+      <div class="relative overflow-hidden rounded-xl sm:rounded-2xl shadow-2xl h-56 sm:h-64 md:h-72">
         {% for farm in highlight_farms %}
         <div class="farm-slide absolute inset-0 transition-all duration-700 ease-in-out {% if forloop.first %}opacity-100 translate-x-0{% else %}opacity-0 translate-x-full{% endif %}" data-farm-index="{{ forloop.counter0 }}">
           <a href="{% url 'farm_detail' slug=farm.slug %}" class="block h-full">
@@ -201,14 +201,14 @@
     {% endif %}
 
     <!-- Products Section Header -->
-    <div class="flex items-center justify-between mb-6 mt-12">
-      <h2 class="text-3xl font-bold text-gray-900 flex items-center">
-        <svg class="w-7 h-7 text-green-700 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+    <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 mb-6 mt-8 sm:mt-12">
+      <h2 class="text-2xl sm:text-3xl font-bold text-gray-900 flex items-center">
+        <svg class="w-6 h-6 sm:w-7 sm:h-7 text-green-700 mr-2 sm:mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
           <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4" />
         </svg>
-        Fresh Products
+        <span>Fresh Products</span>
       </h2>
-      <span class="text-sm text-gray-600 bg-gray-100 px-4 py-2 rounded-full">{{ products.paginator.count }} item{{ products.paginator.count|pluralize }} available</span>
+      <span class="text-xs sm:text-sm text-gray-600 bg-gray-100 px-3 sm:px-4 py-1.5 sm:py-2 rounded-full whitespace-nowrap">{{ products.paginator.count }} item{{ products.paginator.count|pluralize }} available</span>
     </div>
 
     <!-- Products Grid with Enhanced Cards -->
@@ -263,53 +263,61 @@
         </div>
       </a>
       {% empty %}
-      <div class="col-span-full text-center py-16">
-        <svg class="w-24 h-24 text-gray-300 mx-auto mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20 13V6a2 2 0 00-2-2H6a2 2 0 00-2 2v7m16 0v5a2 2 0 01-2 2H6a2 2 0 01-2-2v-5m16 0h-2.586a1 1 0 00-.707.293l-2.414 2.414a1 1 0 01-.707.293h-3.172a1 1 0 01-.707-.293l-2.414-2.414A1 1 0 006.586 13H4" />
-        </svg>
-        <p class="text-xl text-gray-500 mb-2">No products found</p>
-        <p class="text-gray-400">Try adjusting your search filters</p>
+      <div class="col-span-full bg-white rounded-2xl shadow-md border border-gray-200 text-center py-12 sm:py-16 px-4">
+        <div class="max-w-md mx-auto">
+          <svg class="w-20 h-20 sm:w-24 sm:h-24 text-gray-300 mx-auto mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20 13V6a2 2 0 00-2-2H6a2 2 0 00-2 2v7m16 0v5a2 2 0 01-2 2H6a2 2 0 01-2-2v-5m16 0h-2.586a1 1 0 00-.707.293l-2.414 2.414a1 1 0 01-.707.293h-3.172a1 1 0 01-.707-.293l-2.414-2.414A1 1 0 006.586 13H4" />
+          </svg>
+          <p class="text-lg sm:text-xl font-semibold text-gray-700 mb-2">No products found</p>
+          <p class="text-sm sm:text-base text-gray-500 mb-4">Try adjusting your search filters or check back later</p>
+          <a href="/marketplace/" class="inline-flex items-center text-green-700 hover:text-green-800 font-medium text-sm">
+            <svg class="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
+            </svg>
+            Clear filters
+          </a>
+        </div>
       </div>
       {% endfor %}
     </div>
 
     <!-- Pagination Controls -->
     {% if products.has_other_pages %}
-    <div class="flex items-center justify-center space-x-2 mt-10 mb-6">
+    <div class="flex flex-col sm:flex-row items-center justify-center gap-4 mt-8 sm:mt-10 mb-6">
       {% if products.has_previous %}
-      <a href="?page={{ products.previous_page_number }}{% if query %}&q={{ query }}{% endif %}{% if location %}&location={{ location }}{% endif %}{% if min_price %}&min_price={{ min_price }}{% endif %}{% if max_price %}&max_price={{ max_price }}{% endif %}" class="bg-white hover:bg-gray-50 border border-gray-300 text-gray-700 font-medium py-2 px-4 rounded-lg shadow-md hover:shadow-lg transition duration-200 flex items-center space-x-2">
-        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+      <a href="?page={{ products.previous_page_number }}{% if query %}&q={{ query }}{% endif %}{% if location %}&location={{ location }}{% endif %}{% if min_price %}&min_price={{ min_price }}{% endif %}{% if max_price %}&max_price={{ max_price }}{% endif %}" class="w-full sm:w-auto bg-white hover:bg-gray-50 border border-gray-300 text-gray-700 font-medium py-2 px-4 rounded-lg shadow-md hover:shadow-lg transition duration-200 flex items-center justify-center space-x-2 text-sm">
+        <svg class="w-4 h-4 sm:w-5 sm:h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
           <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7" />
         </svg>
         <span>Previous</span>
       </a>
       {% endif %}
 
-      <div class="flex items-center space-x-1">
+      <div class="flex items-center space-x-1 overflow-x-auto pb-2 sm:pb-0">
         {% for num in products.paginator.page_range %}
           {% if num == products.number %}
-          <span class="bg-green-600 text-white font-bold py-2 px-4 rounded-lg shadow-md">{{ num }}</span>
+          <span class="bg-green-600 text-white font-bold py-2 px-3 sm:px-4 rounded-lg shadow-md text-sm flex-shrink-0">{{ num }}</span>
           {% elif num > products.number|add:'-3' and num < products.number|add:'3' %}
-          <a href="?page={{ num }}{% if query %}&q={{ query }}{% endif %}{% if location %}&location={{ location }}{% endif %}{% if min_price %}&min_price={{ min_price }}{% endif %}{% if max_price %}&max_price={{ max_price }}{% endif %}" class="bg-white hover:bg-gray-50 border border-gray-300 text-gray-700 font-medium py-2 px-4 rounded-lg shadow-sm hover:shadow-md transition duration-200">{{ num }}</a>
+          <a href="?page={{ num }}{% if query %}&q={{ query }}{% endif %}{% if location %}&location={{ location }}{% endif %}{% if min_price %}&min_price={{ min_price }}{% endif %}{% if max_price %}&max_price={{ max_price }}{% endif %}" class="bg-white hover:bg-gray-50 border border-gray-300 text-gray-700 font-medium py-2 px-3 sm:px-4 rounded-lg shadow-sm hover:shadow-md transition duration-200 text-sm flex-shrink-0">{{ num }}</a>
           {% elif num == 1 or num == products.paginator.num_pages %}
-          <a href="?page={{ num }}{% if query %}&q={{ query }}{% endif %}{% if location %}&location={{ location }}{% endif %}{% if min_price %}&min_price={{ min_price }}{% endif %}{% if max_price %}&max_price={{ max_price }}{% endif %}" class="bg-white hover:bg-gray-50 border border-gray-300 text-gray-700 font-medium py-2 px-4 rounded-lg shadow-sm hover:shadow-md transition duration-200">{{ num }}</a>
+          <a href="?page={{ num }}{% if query %}&q={{ query }}{% endif %}{% if location %}&location={{ location }}{% endif %}{% if min_price %}&min_price={{ min_price }}{% endif %}{% if max_price %}&max_price={{ max_price }}{% endif %}" class="bg-white hover:bg-gray-50 border border-gray-300 text-gray-700 font-medium py-2 px-3 sm:px-4 rounded-lg shadow-sm hover:shadow-md transition duration-200 text-sm flex-shrink-0">{{ num }}</a>
           {% elif num == products.number|add:'-3' or num == products.number|add:'3' %}
-          <span class="text-gray-500 px-2">...</span>
+          <span class="text-gray-500 px-1 sm:px-2 flex-shrink-0">...</span>
           {% endif %}
         {% endfor %}
       </div>
 
       {% if products.has_next %}
-      <a href="?page={{ products.next_page_number }}{% if query %}&q={{ query }}{% endif %}{% if location %}&location={{ location }}{% endif %}{% if min_price %}&min_price={{ min_price }}{% endif %}{% if max_price %}&max_price={{ max_price }}{% endif %}" class="bg-white hover:bg-gray-50 border border-gray-300 text-gray-700 font-medium py-2 px-4 rounded-lg shadow-md hover:shadow-lg transition duration-200 flex items-center space-x-2">
+      <a href="?page={{ products.next_page_number }}{% if query %}&q={{ query }}{% endif %}{% if location %}&location={{ location }}{% endif %}{% if min_price %}&min_price={{ min_price }}{% endif %}{% if max_price %}&max_price={{ max_price }}{% endif %}" class="w-full sm:w-auto bg-white hover:bg-gray-50 border border-gray-300 text-gray-700 font-medium py-2 px-4 rounded-lg shadow-md hover:shadow-lg transition duration-200 flex items-center justify-center space-x-2 text-sm">
         <span>Next</span>
-        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <svg class="w-4 h-4 sm:w-5 sm:h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
           <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" />
         </svg>
       </a>
       {% endif %}
     </div>
 
-    <div class="text-center text-sm text-gray-600 mb-8">
+    <div class="text-center text-xs sm:text-sm text-gray-600 mb-8">
       Showing {{ products.start_index }} - {{ products.end_index }} of {{ products.paginator.count }} products
     </div>
     {% endif %}
