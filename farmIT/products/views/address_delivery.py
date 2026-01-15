@@ -90,11 +90,22 @@ def delivery_quote(request: HttpRequest, product_id: int) -> HttpResponse:
 
     if address is None:
         error = "Please add a delivery address before requesting a quote."
+    elif farm.latitude is None or farm.longitude is None:
+        error = (
+            "This farm has no map coordinates yet. Please ask the farmer to update their "
+            "location so delivery quotes can be calculated."
+        )
+    elif address.latitude is None or address.longitude is None:
+        error = (
+            "Your selected address does not have map coordinates yet. Edit the address and "
+            "add its latitude and longitude in decimal degrees."
+        )
     else:
         try:
             distance_km, eta_minutes, quoted_fee = estimate_distance_and_fee(farm, address)
         except ValueError as exc:
-            error = str(exc)
+            # Fall back to a generic message; avoid leaking internal details.
+            error = "We could not calculate a delivery quote for this route. Please double-check the coordinates."
 
     return render(
         request,
@@ -132,10 +143,24 @@ def delivery_create(request: HttpRequest, product_id: int) -> HttpResponse:
     address_id = request.POST.get("address_id")
     address = get_object_or_404(Address, pk=address_id, user=request.user)
 
+    if farm.latitude is None or farm.longitude is None:
+        return HttpResponse(
+            "This farm has no map coordinates yet. Please contact the farmer to update their location.",
+            status=400,
+        )
+    if address.latitude is None or address.longitude is None:
+        return HttpResponse(
+            "This address does not have map coordinates yet. Edit the address and add latitude and longitude.",
+            status=400,
+        )
+
     try:
         distance_km, eta_minutes, quoted_fee = estimate_distance_and_fee(farm, address)
-    except ValueError as exc:
-        return HttpResponse(str(exc), status=400)
+    except ValueError:
+        return HttpResponse(
+            "We could not calculate a delivery quote for this route. Please double-check the coordinates.",
+            status=400,
+        )
 
     DeliveryRequest.objects.create(
         customer=request.user,

@@ -71,6 +71,22 @@ class FarmForm(forms.ModelForm):
             "longitude",
         )
 
+    def clean_latitude(self):
+        value = self.cleaned_data.get("latitude")
+        if value is None:
+            return value
+        if value < -90 or value > 90:
+            raise forms.ValidationError("Latitude must be between -90 and 90 degrees.")
+        return value
+
+    def clean_longitude(self):
+        value = self.cleaned_data.get("longitude")
+        if value is None:
+            return value
+        if value < -180 or value > 180:
+            raise forms.ValidationError("Longitude must be between -180 and 180 degrees.")
+        return value
+
 
 class ReviewForm(forms.ModelForm):
     def __init__(self, *args, **kwargs):
@@ -115,4 +131,20 @@ class AddressForm(forms.ModelForm):
             "longitude",
             "is_default",
         )
+
+    def clean_latitude(self):
+        value = self.cleaned_data.get("latitude")
+        if value is None:
+            return value
+        if value < -90 or value > 90:
+            raise forms.ValidationError("Latitude must be between -90 and 90 degrees.")
+        return value
+
+    def clean_longitude(self):
+        value = self.cleaned_data.get("longitude")
+        if value is None:
+            return value
+        if value < -180 or value > 180:
+            raise forms.ValidationError("Longitude must be between -180 and 180 degrees.")
+        return value
 
