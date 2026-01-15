@@ -418,6 +418,94 @@ Backend (Django on Railway) ↔ Supabase (Database)
 
 ---
 
+## ✅ Final QA Checklists (Phase 5)
+
+### Farmer role (local dev + Vercel)
+- Authentication & navigation
+  - Register as farmer, login, and land on **My Farm** dashboard
+  - Verify navigation to **Marketplace**, **My Farm**, and **Chat inbox** works
+- Farm management
+  - Create/update farm details including banner, description, location, and coordinates (lat/lng)
+  - Confirm invalid lat/lng are rejected with clear validation errors
+- Product lifecycle
+  - Create product with image upload (Supabase-backed) and via image URL only
+  - Edit and delete products; confirm marketplace updates reflect on farm page and global marketplace
+  - Verify only the owning farmer can modify/delete their products
+- Chat
+  - Receive conversations initiated by customers (from farm page and product detail)
+  - Reply to messages; confirm rate limiting does not interfere with normal usage
+- Delivery
+  - View delivery requests related to their farm; verify statuses and details are correct
+
+### Customer role (local dev + Vercel)
+- Authentication & navigation
+  - Register as customer, login, and land on **Marketplace**
+  - Navigate between marketplace, farm pages, product detail, chat, and delivery quote flows
+- Marketplace & product discovery
+  - Use search, location, and price filters; verify pagination and empty state messaging
+  - Open product detail from marketplace and farm page
+- Chat
+  - Start conversations from product detail and farm page (non-owner products only)
+  - Send and receive messages; confirm auto-refresh and read-status behavior
+  - Verify throttling returns friendly errors only when sending or creating chats excessively
+- Addresses & delivery
+  - Manage address book: create, edit, delete, set default; verify only one default at a time
+  - Ensure invalid lat/lng in address form are rejected with clear errors
+  - Request delivery quote from product detail using default and explicit address selection
+  - Confirm quote shows distance, ETA, fee, and map only when coordinates are present
+  - Create delivery request from a valid quote and see it in delivery list
+
+### Admin / staff (local dev + Vercel)
+- Admin panel
+  - Login to `/admin/` with staff account
+  - Inspect users, farms, products, conversations, reviews, and delivery requests
+  - Optionally toggle `is_approved` on products and confirm marketplace visibility behavior
+- Permissions & safety
+  - Ensure staff can view all products and delivery requests where appropriate
+  - Confirm that non-staff cannot access admin or staff-only actions
+
+### Cross-cutting checks (both environments)
+- Security & rate limiting
+  - Confirm CSRF protection by attempting unsafe actions without CSRF token (should be blocked)
+  - Verify per-IP rate limiting returns 429 with generic messages when abused
+  - Confirm per-feature throttles (chat, delivery, address) do not trigger during normal use
+- UI/UX & responsiveness
+  - Test key flows on mobile viewport (e.g., browser dev tools) and desktop
+  - Verify that carousels, grids, and forms remain usable on narrow screens
+- Error handling
+  - Force common errors (missing coordinates, unauthorized access, invalid forms) and ensure messages are friendly and non-technical
+
+---
+
+## ⚠️ Known Limitations (Phase 5)
+- Chat uses polling (not WebSockets); real-time behavior is **near real-time** only
+- Delivery distance/ETA are based on straight-line Haversine calculations (no road routing yet)
+- Railway backend deployment is postponed; all traffic is served via Vercel serverless Django
+- No full automated test suite is in place; QA currently relies on structured manual test passes using this checklist
+
+---
+
+## 🛠️ Production Debugging Notes (Vercel + Supabase)
+- Logs
+  - Use Vercel dashboard to inspect function logs for Django errors and warnings
+  - Keep `DJANGO_LOG_LEVEL` at `WARNING` or above in production to avoid noisy logs
+- Environment & config
+  - Confirm all required env vars (`DJANGO_ENV`, `DJANGO_SECRET_KEY`, `DATABASE_URL`, `DB_CONN_MAX_AGE`, `DB_SSL_REQUIRE`, `DJANGO_ALLOWED_HOSTS`, `CSRF_TRUSTED_ORIGINS`, `SUPABASE_*`) are set for the affected environment
+  - When debugging auth/CSRF issues, double-check `ALLOWED_HOSTS` and `CSRF_TRUSTED_ORIGINS` alignment with the deployed domain
+- Database & storage
+  - Use Supabase dashboard to:
+    - Inspect tables for unexpected data (e.g., missing coords, broken foreign keys)
+    - Check Storage bucket (`product-images`) for upload issues
+  - For connectivity problems, verify `DATABASE_URL` uses the **Session Pooler** endpoint
+- Local reproduction
+  - Pull production env vars via Vercel CLI into a local `.env` and reproduce issues against the same DB
+  - Run `python manage.py check --deploy` locally with prod-like settings when changing security-related config
+- Safety practices
+  - Avoid making schema changes directly in production without Django migrations
+  - For incidents, prefer read-only inspection first (logs, DB) before applying hotfixes via new deploys
+
+---
+
 ## 🧠 Strategic Context
 
 ### **Why This Project Matters in the Philippines**
